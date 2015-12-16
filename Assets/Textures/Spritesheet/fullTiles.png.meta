@@ -1,0 +1,457 @@
+fileFormatVersion: 2
+guid: 076950f3de0c19247a6c754623f7f218
+timeCreated: 1450199292
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: tileAutumn.png
+    21300002: tileAutumn_full.png
+    21300004: tileDirt.png
+    21300006: tileDirt_full.png
+    21300008: tileGrass.png
+    21300010: tileGrass_full.png
+    21300012: tileLava.png
+    21300014: tileLava_full.png
+    21300016: tileMagic.png
+    21300018: tileMagic_full.png
+    21300020: tileRock.png
+    21300022: tileRock_full.png
+    21300024: tileSand.png
+    21300026: tileSand_full.png
+    21300028: tileSnow.png
+    21300030: tileSnow_full.png
+    21300032: tileStone.png
+    21300034: tileStone_full.png
+    21300036: tileWater.png
+    21300038: tileWater_full.png
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: tileAutumn.png
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 245
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileAutumn_full.png
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 334
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileDirt.png
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 423
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileDirt_full.png
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 67
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileGrass.png
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 156
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileGrass_full.png
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 245
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileLava.png
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 334
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileLava_full.png
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 423
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileMagic.png
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 67
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileMagic_full.png
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 156
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileRock.png
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 245
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileRock_full.png
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 334
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileSand.png
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 423
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileSand_full.png
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 67
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileSnow.png
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 156
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileSnow_full.png
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 245
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileStone.png
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 334
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileStone_full.png
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 423
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileWater.png
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 67
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    - name: tileWater_full.png
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 156
+        width: 65
+        height: 89
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6.5, y: 44.5}
+        - {x: -32.5, y: 33.5}
+        - {x: -32.5, y: -31.5}
+        - {x: -12.5, y: -44.5}
+        - {x: 7.5, y: -44.5}
+        - {x: 32.5, y: -35.5}
+        - {x: 32.5, y: 33.5}
+        - {x: 12.5, y: 44.5}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
