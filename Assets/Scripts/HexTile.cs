@@ -1,33 +1,136 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Runtime.Remoting;
+﻿using System;
+using UnityEngine;
 using Settworks.Hexagons;
 using UnityEngine.EventSystems;
 
+
 public class HexTile : MonoBehaviour, IPointerClickHandler
 {
-    // Use this for initialization
-    void Start()
-    {
+    public const string ON_HEX_CLICKED_EVENT_NAME = "OnHexClicked";
 
+    [SerializeField]
+    private State _idleState;
+    [SerializeField]
+    private State _highlightState;
+    [SerializeField]
+    private State _notPassableState;
+    [SerializeField]
+    private int _movementCost;
+
+    private HexCoord _hexCoord;
+    private SpriteRenderer _spriteRenderer;
+    private bool _isPassable;
+    private GameObject _occupyingObject;
+
+    public HexCoord Coord
+    {
+        get { return _hexCoord; }
     }
 
-    // Update is called once per frame
-    void Update()
+    protected SpriteRenderer SpriteRenderer
     {
+        get
+        {
+            if (_spriteRenderer == null) _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            return _spriteRenderer;
+        }
+    }
 
+    public bool IsPassable
+    {
+        get { return _isPassable && !IsOccupied; }
+    }
+
+    public bool IsOccupied
+    {
+        get { return _occupyingObject != null; }
+    }
+
+    public int MovementCost
+    {
+        get { return _movementCost; }
+    }
+
+    public GameObject OccupyingObject
+    {
+        get { return _occupyingObject; }
+        set { _occupyingObject = value; }
+    }
+
+    public void SetCoord(int q, int r, bool isPassable = true)
+    {
+        SetCoord(new HexCoord(q, r));
+        _isPassable = isPassable;
+        AutoSetState();
+    }
+
+    public void SetCoord(HexCoord coord, bool isPassable = true)
+    {
+        _hexCoord = coord;
+        name = coord.ToString();
+        _isPassable = isPassable;
+        AutoSetState();
+    }
+
+    public void HighlightTile(Color c)
+    {
+        SpriteRenderer.sprite = _highlightState.Sprite;
+        SpriteRenderer.color = c;
+    }
+
+
+    public void HighlightTile()
+    {
+        SpriteRenderer.sprite = _highlightState.Sprite;
+        SpriteRenderer.color = _highlightState.Color;
+    }
+
+    public void ResetToIdle()
+    {
+        SpriteRenderer.sprite = _idleState.Sprite;
+        SpriteRenderer.color = _idleState.Color;
+    }
+
+    public void SetImpassable()
+    {
+        SpriteRenderer.sprite = _notPassableState.Sprite;
+        SpriteRenderer.color = _notPassableState.Color;
+        _isPassable = false;
+    }
+
+    public void AutoSetState()
+    {
+        if (_isPassable) ResetToIdle();
+        else SetImpassable();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("PointerEventData.OnPointerClick: " + eventData.pointerPress.name, eventData.pointerPress);
+        Messenger.Broadcast<HexTile>(ON_HEX_CLICKED_EVENT_NAME, this);
+    }
 
-        HexGrid hexGrid = FindObjectOfType<HexGrid>();
-        HexCoord myHexCoord = hexGrid.GetHexAtXYCoordinate(new Vector2(transform.position.x, transform.position.z));
-        Debug.Log("Self: " + myHexCoord.ToString());
-        foreach (HexCoord hexCoord in hexGrid.HexesInRange(myHexCoord, 2))
+    [Serializable]
+    protected struct State
+    {
+        [SerializeField]
+        Sprite _sprite;
+        [SerializeField]
+        Color _color;
+
+        public State(Sprite sprite, Color color)
         {
-            Debug.Log("Range: " + hexCoord.ToString() + ", dis: " + HexCoord.Distance(hexCoord, myHexCoord));
+            _sprite = sprite;
+            _color = color;
+        }
+
+        public Sprite Sprite
+        {
+            get { return _sprite; }
+        }
+
+        public Color Color
+        {
+            get { return _color; }
         }
     }
 }

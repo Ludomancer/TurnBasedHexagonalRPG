@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEditorInternal;
 
 namespace Settworks.Hexagons
 {
@@ -15,7 +16,7 @@ namespace Settworks.Hexagons
     [Serializable]
     public struct HexCoord
     {
-
+        public static readonly HexCoord INVALID = new HexCoord(int.MinValue, int.MinValue);
         /// <summary>
         /// Position on the q axis.
         /// </summary>

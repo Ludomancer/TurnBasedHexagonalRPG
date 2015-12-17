@@ -1,36 +1,44 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Settworks.Hexagons;
-using UnityEditor;
 
 public class HexGrid : MonoBehaviour
 {
     [SerializeField]
-    private Collider _board;
+    private BoxCollider _board;
     [SerializeField]
     private GameObject _hexPrefab;
     [SerializeField]
     private int _widthInHexes;
+    [SerializeField, Range(0, 1)]
+    private float _roadBlockChance;
+
+    /// <summary>
+    /// Calculated from width.
+    /// </summary>
     private int _heightInHexes;
-
     private Transform _transform;
-
-    private HexCoord[][] _hexGrid;
-
-    private float _hexSize;
-    private float _hexScaleFactor;
-
-    private Vector3 _startPos;
+    private HexTile[][] _hexGrid;
+    private static float _hexScaleFactor;
+    private static Vector3 _startPos;
 
     // Use this for initialization
     void Start()
     {
+        _transform = transform;
+
+        GenerateHexGrid();
+    }
+
+    /// <summary>
+    /// Randomly generate a hex grid that would fill the given BoxCollider.
+    /// </summary>
+    private void GenerateHexGrid()
+    {
         if (_hexPrefab == null) throw new ArgumentNullException("_prefab");
         if (_board == null) throw new ArgumentNullException("_board");
-
-        _transform = transform;
 
         float boardWidth = _board.bounds.size.x;
         float boardHeight = _board.bounds.size.z;
@@ -40,17 +48,19 @@ public class HexGrid : MonoBehaviour
         float sideToSideSize = gameObjectScale / (Mathf.Sqrt(3) / 2f);
         _hexPrefab.transform.localScale = Vector3.one * (sideToSideSize);
 
+        //Size of a single side
         float sideSize = _hexPrefab.transform.localScale.z / 2f;
 
+        //Save hex scale factor for later use.
         _hexScaleFactor = 1f / sideSize;
 
-        //2 Vertical hexagons coupled.
+        //2 Vertical hexagons coupled together for ease of calculation.
         float totalHexHeightCoupled = Mathf.RoundToInt(boardHeight / (sideSize * 3));
 
         //Find total hexagon count.
         _heightInHexes = (int)(totalHexHeightCoupled * 2);
 
-        //Find total hexagon height.
+        //Find total hexagon height. 1 for odds, 2 for evens.
         float totalHexHeight = totalHexHeightCoupled * sideSize * 3;
 
         //Clip overflow.
@@ -61,105 +71,193 @@ public class HexGrid : MonoBehaviour
             _heightInHexes--;
         }
 
+        //Center the grid vertically.
         float verticalPadding = Mathf.Max(0, (boardHeight - totalHexHeight) / 2f);
 
+        //Offset grid to being from the corner instead of center.
         _startPos = _transform.position -
-           new Vector3((boardWidth - gameObjectScale) * 0.5f,
-           0,
-           (boardHeight - sideToSideSize) * 0.5f - verticalPadding);
+            new Vector3((boardWidth - gameObjectScale) * 0.5f,
+                0,
+                (boardHeight - sideToSideSize) * 0.5f - verticalPadding);
 
-        _hexGrid = new HexCoord[_heightInHexes][];
-        //for (int r = 0; r < _heightInHexes; r++)
-        //{
-        //    int tempWidth = r % 2 == 0 ? _widthInHexes : _widthInHexes - 1;
-        //    for (int q = 0; q < tempWidth; q++)
-        //    {
-        //        _hexGrid[r] = new HexCoord[tempWidth];
-        //        _hexGrid[r][q] = new HexCoord(q - (r - (r & 1)) / 2, r);
-        //        Vector2 hexPos = _hexGrid[r][q].Position();
-        //        Vector3 worldPosition = _startPos + new Vector3(hexPos.x, 0, hexPos.y) / _hexScaleFactor;
-        //        GameObject spawnedHex = Instantiate(_hexPrefab, worldPosition, Quaternion.identity) as GameObject;
-        //        spawnedHex.name = _hexGrid[r][q].ToString() +  "(q:" + q + ", r:" + r + ")" + GetHexAtQRCoordinate(q,r);
-        //        spawnedHex.transform.parent = _transform;
-        //    }
-        //}
+        _hexGrid = new HexTile[_heightInHexes][];
 
         for (int r = 0; r < _heightInHexes; r++)
         {
+            //Prevent overflow on odd columns.
             int tempWidth = r % 2 == 0 ? _widthInHexes : _widthInHexes - 1;
-            _hexGrid[r] = new HexCoord[tempWidth];
+            _hexGrid[r] = new HexTile[tempWidth];
             for (int q = 0; q < tempWidth; q++)
             {
-                _hexGrid[r][q] = new HexCoord(q - (r - (r & 1)) / 2, r);
-                Vector2 hexPos = _hexGrid[r][q].Position();
-                Debug.Log("(index: q:" + q + ", r:" + r + "), data stored: " + _hexGrid[r][q] + "-------");
-                Vector3 worldPosition = _startPos + new Vector3(hexPos.x, 0, hexPos.y) / _hexScaleFactor;
-                GameObject spawnedHex = Instantiate(_hexPrefab, worldPosition, Quaternion.identity) as GameObject;
-                spawnedHex.name = _hexGrid[r][q].ToString() + "(q:" + q + ", r:" + r + ")";
+                //Scale and position Hex.
+                HexCoord newHexCoord = new HexCoord(q - (r - (r & 1)) / 2, r);
+
+                //Spawn and parent Hex.
+                GameObject spawnedHex = Instantiate(_hexPrefab, GetHexWorldPosition(newHexCoord), Quaternion.identity) as GameObject;
                 spawnedHex.transform.parent = _transform;
 
-                HexCoord test = GetHexAtXYCoordinate(new Vector2(worldPosition.x, worldPosition.z));
-                if (test != _hexGrid[r][q])
+                //Initialize Hex.
+                HexTile hexTile = spawnedHex.GetComponent<HexTile>();
+                bool isPassable;
+                //An easy way to make sure board is traversable from side to side.
+                if (newHexCoord.Neighbors().Where(IsCordinateValid).Any(tile =>
                 {
-                    Debug.LogError("Entry: " + _hexGrid[r][q]);
-                    Debug.LogError("Output: " + test);
+                    HexTile hexTileTemp = GetHexTile(tile);
+                    return hexTileTemp != null && !hexTileTemp.IsPassable;
+                }))
+                {
+                    isPassable = true;
                 }
-
-                Debug.Log("------------------------------");
+                else
+                {
+                    isPassable = !(UnityEngine.Random.value < _roadBlockChance && r > 1 && _heightInHexes - r > 2);
+                }
+                hexTile.SetCoord(newHexCoord, isPassable);
+                _hexGrid[r][q] = hexTile;
             }
         }
     }
 
-    /// <param name="x">Column</param>
-    /// <param name="y">Row</param>
-    public HexCoord GetHexAtQRCoordinate(Vector2 coordinate)
+    /// <summary>
+    /// Converts HexCoord to world position according to this grid.
+    /// </summary>
+    /// <param name="hexCoord"></param>
+    /// <returns></returns>
+    public Vector3 GetHexWorldPosition(HexCoord hexCoord)
     {
-        return GetHexAtQRCoordinate(Mathf.RoundToInt(coordinate.x), Mathf.RoundToInt(coordinate.y));
+        Vector2 hexPos = hexCoord.Position();
+        return _startPos + new Vector3(hexPos.x, 0, hexPos.y) / _hexScaleFactor;
     }
 
-    /// <param name="q">Column</param>
-    /// <param name="r">Row</param>
-    public bool IsQRCoordinateValid(int q, int r)
+    /// <summary>
+    /// This finds and uses actual array indexes and checks their validity.
+    /// </summary>
+    public bool IsCordinateValid(HexCoord hexCoord)
+    {
+        return IsCordinateValid(hexCoord.q, hexCoord.r);
+    }
+
+    /// <summary>
+    /// This finds and uses actual array indexes and checks their validity.
+    /// </summary>
+    public bool IsCordinateValid(int q, int r)
     {
         if (_hexGrid.Length > 0 && r >= 0 && r < _hexGrid.Length)
         {
             int calculatedQ = (q + r / 2);
-            return (_hexGrid[r].Length > 0 && calculatedQ >= 0 && calculatedQ < _hexGrid[r].Length);
+            return (_hexGrid[r] != null && _hexGrid[r].Length > 0 && calculatedQ >= 0 && calculatedQ < _hexGrid[r].Length);
         }
         return false;
     }
 
-    /// <param name="q">Column</param>
-    /// <param name="r">Row</param>
-    public HexCoord GetHexAtQRCoordinate(int q, int r)
+    /// <summary>
+    /// This finds actual data in grid array.
+    /// </summary>
+    public HexTile GetHexTile(HexCoord hexCooord)
     {
-        Debug.Log("Trying: " + "(q:" + (q + r / 2) + ", r:" + r + ")");
+        return GetHexTile(hexCooord.q, hexCooord.r);
+    }
+
+    /// <summary>
+    /// This finds actual data in grid array.
+    /// </summary>
+    public HexTile GetHexTile(int q, int r)
+    {
+        //Debug.Log("Org: " + "(q:" + q + ", r:" + r + ")");
+        //Debug.Log("Trying: " + "(q:" + (q + r / 2) + ", r:" + r + ")");
+        //Fix for negative indexes. Translates them to array indexes.
         return _hexGrid[r][q + r / 2];
     }
 
-    /// <param name="q">Column</param>
-    /// <param name="r">Row</param>
-    public HexCoord GetHexAtXYCoordinate(Vector2 coordinate)
+    /// <summary>
+    /// This finds actual array indexes by reversing offset and scaling applied to HexCoord.
+    /// </summary>
+    /// <param name="coordinate">World Position of Tile.</param>
+    public HexTile GetHexTile(Vector2 coordinate)
     {
         Vector2 noOffset = new Vector2(coordinate.x - _startPos.x, coordinate.y - _startPos.z) * _hexScaleFactor;
-        Debug.Log("noOffset: " + noOffset);
         Vector2 qrVector2 = HexCoord.VectorXYtoQR(noOffset);
-        Debug.Log("qrVector2: " + qrVector2);
-        return GetHexAtQRCoordinate(qrVector2);
+        return GetHexTile(Mathf.RoundToInt(qrVector2.x), Mathf.RoundToInt(qrVector2.y));
     }
 
-    public IEnumerable<HexCoord> HexesInRange(HexCoord centerHex, int range)
+    /// <summary>
+    /// Modified breadth first search algorithm that enumarates all hexes that are reachable by given range.
+    /// </summary>
+    /// <param name="centerHex">Start hex.</param>
+    /// <param name="range">Range to search.</param>
+    /// <param name="allowOccupiedAsLast">Allow occupied hexes if they are on the last node.</param>
+    /// <returns>Enumarates found HexTiles.</returns>
+    public IEnumerable<HexTile> HexesInReachableRange(HexCoord centerHex, int range, bool allowOccupiedAsLast)
     {
-        for (int r = centerHex.r - range; r <= centerHex.r + range; r++)
+        List<HexCoord> visited = new List<HexCoord> { centerHex };
+
+        Queue<HexCoord> frontier = new Queue<HexCoord>();
+        frontier.Enqueue(centerHex);
+
+        int currentCost = 0;
+        int elementsToDepthIncrease = 1;
+        int nextElementsToDepthIncrease = 0;
+
+        while (frontier.Count > 0)
         {
-            for (int q = centerHex.q - range; q <= centerHex.q + range; q++)
+            var current = frontier.Dequeue();
+            HexTile hexTile = GetHexTile(current);
+            yield return hexTile;
+            foreach (HexCoord neighbor in current.Neighbors())
             {
-                if (IsQRCoordinateValid(q, r))
+                //Early exit if already checked this node
+                if (visited.Contains(neighbor)) continue;
+                //Make sure we are achecing inside the board.
+                if (!IsCordinateValid(neighbor)) continue;
+                HexTile neighborTile = GetHexTile(neighbor);
+                //Make sure it is passable. Allow occupied hexes if they are the last node.
+                if (neighborTile.IsPassable || (allowOccupiedAsLast && neighborTile.IsOccupied && range - currentCost == GetHexTile(neighbor).MovementCost))
                 {
-                    HexCoord temp = GetHexAtQRCoordinate(q, r);
-                    if (Mathf.Abs(HexCoord.Distance(centerHex, temp)) <= range)
-                        yield return temp;
+                    //Only increasenextElementsToDepthIncrease if element is added to the queue.
+                    nextElementsToDepthIncrease++;
+                    frontier.Enqueue(neighbor);
+                    visited.Add(neighbor);
                 }
+            }
+            if (--elementsToDepthIncrease == 0)
+            {
+                currentCost += hexTile.MovementCost;
+                if (currentCost > range) yield break;
+                elementsToDepthIncrease = nextElementsToDepthIncrease;
+                nextElementsToDepthIncrease = 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Finds Hexes in given radius from center.
+    /// </summary>
+    /// <param name="centerHex">Start hex.</param>
+    /// <param name="range">Range to search.</param>
+    /// <returns>Enumarates found HexTiles.</returns>
+    public IEnumerable<HexTile> HexesInRange(HexCoord centerHex, int range)
+    {
+        return HexesInRange(centerHex, 0, range);
+    }
+
+    /// <summary>
+    /// Finds Hexes in given min and max radius from center.
+    /// </summary>
+    /// <param name="centerHex">Start hex.</param>
+    /// <param name="range">Range to search.</param>
+    /// <returns>Enumarates found HexTiles.</returns>
+    public IEnumerable<HexTile> HexesInRange(HexCoord centerHex, int minRange, int maxRange)
+    {
+        for (int r = centerHex.r - maxRange; r <= centerHex.r + maxRange; r++)
+        {
+            for (int q = centerHex.q - maxRange; q <= centerHex.q + maxRange; q++)
+            {
+                if (!IsCordinateValid(q, r)) continue;
+
+                HexTile tempHex = GetHexTile(q, r);
+                float distance = Mathf.Abs(HexCoord.Distance(centerHex, tempHex.Coord));
+                if (centerHex != tempHex.Coord && distance <= maxRange && distance >= minRange)
+                    yield return tempHex;
             }
         }
     }
