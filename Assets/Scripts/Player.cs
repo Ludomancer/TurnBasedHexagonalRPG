@@ -1,14 +1,17 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
-    private bool _isAiControlled;
-    private int _id = -1;
+    #region Fields
 
-    readonly ListQueue<HexUnit> _units = new ListQueue<HexUnit>();
+    private int _id = -1;
+    private bool _isAiControlled;
+    private readonly ListQueue<HexUnit> _units = new ListQueue<HexUnit>();
+
+    #endregion
+
+    #region Properties
 
     public int Id
     {
@@ -19,6 +22,15 @@ public class Player : MonoBehaviour
     {
         get { return _isAiControlled; }
     }
+
+    public int UnitCount
+    {
+        get { return _units == null ? 0 : _units.Count; }
+    }
+
+    #endregion
+
+    #region Other Members
 
     // Use this for initialization
     public void Initialize(int id, bool isAiControlled)
@@ -54,16 +66,10 @@ public class Player : MonoBehaviour
         _units.Remove(hexUnit);
     }
 
-    public int UnitCount
-    {
-        get
-        {
-            return _units == null ? 0 : _units.Count;
-        }
-    }
-
     public override string ToString()
     {
         return "Player " + (Id + 1);
     }
+
+    #endregion
 }

@@ -1,28 +1,40 @@
 ﻿using System;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Settworks.Hexagons;
+using UnityEngine;
 
 public class HexGrid : MonoBehaviour
 {
+    #region Fields
+
+    private static float _hexScaleFactor;
+    private static Vector3 _startPos;
+
     [SerializeField]
     private BoxCollider _board;
-    [SerializeField]
-    private GameObject _hexPrefab;
-    [SerializeField]
-    private int _widthInHexes;
-    [SerializeField, Range(0, 1)]
-    private float _roadBlockChance;
 
     /// <summary>
     /// Calculated from width.
     /// </summary>
     private int _heightInHexes;
-    private Transform _transform;
+
     private HexTile[][] _hexGrid;
-    private static float _hexScaleFactor;
-    private static Vector3 _startPos;
+
+    [SerializeField]
+    private GameObject _hexPrefab;
+
+    [SerializeField, Range(0, 1)]
+    private float _roadBlockChance;
+
+    private Transform _transform;
+
+    [SerializeField]
+    private int _widthInHexes;
+
+    #endregion
+
+    #region Properties
 
     /// <summary>
     /// Calculated from width.
@@ -42,8 +54,12 @@ public class HexGrid : MonoBehaviour
         get { return _board; }
     }
 
+    #endregion
+
+    #region Other Members
+
     // Use this for initialization
-    void Start()
+    private void Start()
     {
         _transform = transform;
 
@@ -111,7 +127,8 @@ public class HexGrid : MonoBehaviour
                 HexCoord newHexCoord = new HexCoord(q - (r - (r & 1)) / 2, r);
 
                 //Spawn and parent Hex.
-                GameObject spawnedHex = Instantiate(_hexPrefab, GetWorldPositionOfHex(newHexCoord), Quaternion.identity) as GameObject;
+                GameObject spawnedHex =
+                    Instantiate(_hexPrefab, GetWorldPositionOfHex(newHexCoord), Quaternion.identity) as GameObject;
                 spawnedHex.transform.parent = _transform;
 
                 //Initialize Hex.
@@ -163,7 +180,8 @@ public class HexGrid : MonoBehaviour
         if (_hexGrid.Length > 0 && r >= 0 && r < _hexGrid.Length)
         {
             int calculatedQ = (q + r / 2);
-            return (_hexGrid[r] != null && _hexGrid[r].Length > 0 && calculatedQ >= 0 && calculatedQ < _hexGrid[r].Length);
+            return (_hexGrid[r] != null && _hexGrid[r].Length > 0 && calculatedQ >= 0
+                && calculatedQ < _hexGrid[r].Length);
         }
         return false;
     }
@@ -230,7 +248,7 @@ public class HexGrid : MonoBehaviour
     /// <returns>Enumarates and returns found HexTiles.</returns>
     public IEnumerable<HexTile> HexesInReachableRange(HexCoord centerHex, int range, bool allowOccupiedAsLast)
     {
-        List<HexCoord> visited = new List<HexCoord> { centerHex };
+        List<HexCoord> visited = new List<HexCoord> {centerHex};
 
         Queue<HexCoord> frontier = new Queue<HexCoord>();
         frontier.Enqueue(centerHex);
@@ -252,7 +270,9 @@ public class HexGrid : MonoBehaviour
                 if (!IsCordinateValid(neighbor)) continue;
                 HexTile neighborTile = GetHexTile(neighbor);
                 //Make sure it is passable. Allow occupied hexes if they are the last node.
-                if (neighborTile.IsPassable || (allowOccupiedAsLast && neighborTile.IsOccupied && range - currentCost == GetHexTile(neighbor).MovementCost))
+                if (neighborTile.IsPassable
+                    || (allowOccupiedAsLast && neighborTile.IsOccupied
+                        && range - currentCost == GetHexTile(neighbor).MovementCost))
                 {
                     //Only increasenextElementsToDepthIncrease if element is added to the queue.
                     nextElementsToDepthIncrease++;
@@ -297,7 +317,7 @@ public class HexGrid : MonoBehaviour
                 if (!IsCordinateValid(q, r)) continue;
                 HexTile tempHex = GetHexTile(q, r);
                 if (centerHex != tempHex.Coord)
-                {                 
+                {
                     float distance = Mathf.Abs(HexCoord.Distance(centerHex, tempHex.Coord));
                     if (distance <= maxRange && distance >= minRange)
                         yield return tempHex;
@@ -305,4 +325,6 @@ public class HexGrid : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }

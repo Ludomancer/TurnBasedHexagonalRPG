@@ -1,23 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using Settworks.Hexagons;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-class AbilityAimUnit : AbilityAim
+internal class AbilityAimUnit : AbilityAim
 {
-    public LayerMask layerMask;
+    #region Fields
+
     [SerializeField]
-    private bool _targetEnemy;
+    private bool _canTargetSelf;
+
     [SerializeField]
     private int _rangeMax;
+
     [SerializeField]
     private int _rangeMin;
 
     [SerializeField]
-    private bool _canTargetSelf;
+    private bool _targetEnemy;
+
+    public LayerMask layerMask;
+
+    #endregion
+
+    #region Properties
 
     public int RangeMin
     {
@@ -28,6 +32,10 @@ class AbilityAimUnit : AbilityAim
     {
         get { return _rangeMax; }
     }
+
+    #endregion
+
+    #region Other Members
 
     protected override void Init()
     {
@@ -68,8 +76,10 @@ class AbilityAimUnit : AbilityAim
             {
                 return _targetEnemy;
             }
-            else return !_targetEnemy;
+            return !_targetEnemy;
         }
         return false;
     }
+
+    #endregion
 }

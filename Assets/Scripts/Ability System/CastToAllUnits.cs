@@ -2,38 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
-[RequireComponent(typeof(Ability))]
-class CastToAllUnits : MonoBehaviour, ICastable
+[RequireComponent(typeof (Ability))]
+internal class CastToAllUnits : MonoBehaviour, ICastable
 {
-    [SerializeField]
-    private GameObject _subEffect;
+    #region Fields
 
     private bool _isBusy;
 
-    void Awake()
+    [SerializeField]
+    private GameObject _subEffect;
+
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
 #if UNITY_EDITOR
-        if (GetComponents<CastToAllUnits>().Length > 1) throw new Exception("An ability can only have 1 CastToAllUnits");
+        if (GetComponents<CastToAllUnits>().Length > 1)
+            throw new Exception("An ability can only have 1 CastToAllUnits");
         if (!_subEffect) throw new Exception("CastToAllUnits requires a SubEffect.");
-        if (!_subEffect.GetComponent<Ability>()) throw new Exception("CastToAllUnits requires a SubEffect with an Ability attached.");
+        if (!_subEffect.GetComponent<Ability>())
+            throw new Exception("CastToAllUnits requires a SubEffect with an Ability attached.");
 
 #endif
-    }
-
-    public void Cast()
-    {
-        Player target = GetComponent<Ability>().Target.GetComponent<Player>();
-        if (!target) throw new Exception("CastToAllUnits requirest Player as Ability target");
-
-        StartCoroutine(CastRoutine(target));
-    }
-
-    public bool IsBusy()
-    {
-        return _isBusy;
     }
 
     private IEnumerator CastRoutine(Player target)
@@ -48,7 +42,7 @@ class CastToAllUnits : MonoBehaviour, ICastable
             tempInstances.Add(newAbilityIns);
 
             Ability newAbility = newAbilityIns.GetComponent<Ability>();
-            Component[] subAbilityCastables = _subEffect.GetComponents(typeof(ICastable));
+            Component[] subAbilityCastables = _subEffect.GetComponents(typeof (ICastable));
             castables.AddRange(subAbilityCastables);
             //Set target for sub ability.
             newAbility.Target = target.PeekUnit(i).gameObject;
@@ -68,4 +62,23 @@ class CastToAllUnits : MonoBehaviour, ICastable
 
         _isBusy = false;
     }
+
+    #endregion
+
+    #region ICastable Members
+
+    public void Cast()
+    {
+        Player target = GetComponent<Ability>().Target.GetComponent<Player>();
+        if (!target) throw new Exception("CastToAllUnits requirest Player as Ability target");
+
+        StartCoroutine(CastRoutine(target));
+    }
+
+    public bool IsBusy()
+    {
+        return _isBusy;
+    }
+
+    #endregion
 }

@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Settworks.Hexagons;
 using UnityEngine;
 
-[RequireComponent(typeof(Ability))]
-abstract class AbilityAim : MonoBehaviour
+[RequireComponent(typeof (Ability))]
+internal abstract class AbilityAim : MonoBehaviour
 {
+    #region Fields
+
     protected Ability _ability;
 
-    void Awake()
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
         _ability = GetComponent<Ability>();
 #if UNITY_EDITOR
@@ -19,6 +22,11 @@ abstract class AbilityAim : MonoBehaviour
         Init();
     }
 
-    protected virtual void Init() { }
+    protected virtual void Init()
+    {
+    }
+
     public abstract List<HexTile> GetAvailableHexes(HexGrid hexGrid);
+
+    #endregion
 }

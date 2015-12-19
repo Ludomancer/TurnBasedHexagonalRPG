@@ -1,7 +1,10 @@
-﻿using JetBrains.Annotations;
-using UnityEngine;
+﻿using UnityEngine;
 
-interface IOnTargetSelected
+internal interface IOnTargetSelected
 {
+    #region Other Members
+
     void OnTargetSelectionChanged(GameObject target);
+
+    #endregion
 }

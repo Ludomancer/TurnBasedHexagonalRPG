@@ -1,8 +1,8 @@
 ﻿//UnityUtils https://github.com/mortennobel/UnityUtils
 //By Morten Nobel-Jørgensen
 //License lgpl 3.0 (http://www.gnu.org/licenses/lgpl-3.0.txt)
-using System.Collections.Generic;
 
+using System.Collections.Generic;
 
 /// <summary>
 /// Based on http://blogs.msdn.com/b/ericlippert/archive/2007/10/08/path-finding-using-a-in-c-3-0-part-three.aspx
@@ -10,7 +10,22 @@ using System.Collections.Generic;
 /// </summary>
 public class PriorityQueue<P, V>
 {
+    #region Fields
+
     private SortedDictionary<P, LinkedList<V>> list = new SortedDictionary<P, LinkedList<V>>();
+
+    #endregion
+
+    #region Properties
+
+    public bool IsEmpty
+    {
+        get { return list.Count == 0; }
+    }
+
+    #endregion
+
+    #region Other Members
 
     public void Enqueue(V value, P priority)
     {
@@ -33,13 +48,12 @@ public class PriorityQueue<P, V>
         V res = v.First.Value;
         v.RemoveFirst();
         if (v.Count == 0)
-        { // nothing left of the top priority.
+        {
+            // nothing left of the top priority.
             list.Remove(key);
         }
         return res;
     }
-
-
 
     public void Replace(V value, P oldPriority, P newPriority)
     {
@@ -47,16 +61,12 @@ public class PriorityQueue<P, V>
         v.Remove(value);
 
         if (v.Count == 0)
-        { // nothing left of the top priority.
+        {
+            // nothing left of the top priority.
             list.Remove(oldPriority);
         }
 
         Enqueue(value, newPriority);
-    }
-
-    public bool IsEmpty
-    {
-        get { return list.Count == 0; }
     }
 
     public override string ToString()
@@ -71,4 +81,6 @@ public class PriorityQueue<P, V>
         }
         return res;
     }
+
+    #endregion
 }

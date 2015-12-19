@@ -1,26 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Destructable : MonoBehaviour
 {
+    #region Fields
+
     public const string ON_HEALTH_CHANGED = "OnHealthChanged";
+    protected int _healthLeft;
 
     [SerializeField]
     protected int _maxHealth;
 
-    protected int _healthLeft;
-
     protected Transform _transform;
 
-    void Awake()
-    {
-        _transform = transform;
-    }
+    #endregion
 
-    void OnEnable()
-    {
-        Reset();
-    }
+    #region Properties
 
     public virtual bool IsDead
     {
@@ -46,9 +40,25 @@ public class Destructable : MonoBehaviour
         get { return _maxHealth; }
     }
 
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
+    {
+        _transform = transform;
+    }
+
+    private void OnEnable()
+    {
+        Reset();
+    }
+
     public virtual void Reset()
     {
         //Don't trigger event.
         _healthLeft = MaxHealth;
     }
+
+    #endregion
 }

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
-class InstantApply : MonoBehaviour, ICastable
+internal class InstantApply : MonoBehaviour, ICastable
 {
+    #region ICastable Members
+
     public void Cast()
     {
         //Apply all effects
-        foreach (IAppliable appliable in GetComponents(typeof(IAppliable)))
+        foreach (IAppliable appliable in GetComponents(typeof (IAppliable)))
         {
             appliable.Apply();
         }
@@ -19,4 +17,6 @@ class InstantApply : MonoBehaviour, ICastable
     {
         return false;
     }
+
+    #endregion
 }

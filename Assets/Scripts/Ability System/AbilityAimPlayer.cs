@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using Settworks.Hexagons;
 
-class AbilityAimPlayer : AbilityAim
+internal class AbilityAimPlayer : AbilityAim
 {
-    void OnEnable()
+    #region Other Members
+
+    private void OnEnable()
     {
         if (_ability.IsInitialized)
         {
@@ -15,4 +16,6 @@ class AbilityAimPlayer : AbilityAim
     {
         return null;
     }
+
+    #endregion
 }

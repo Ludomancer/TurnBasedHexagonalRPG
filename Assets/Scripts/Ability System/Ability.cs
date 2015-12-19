@@ -1,38 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Settworks.Hexagons;
-using UnityEngine;
+﻿using UnityEngine;
 
-[RequireComponent(typeof(CastAbility))]
+[RequireComponent(typeof (CastAbility))]
 public class Ability : MonoBehaviour
 {
+    #region Fields
+
     public const string ON_ABILITY_ACTIVATED = "OnAbilityActivated";
     public const string ON_ABILITY_DEACTIVATED = "OnAbilityDeactivated";
     public const string ON_CAST_COMPLETED = "OnCastCompleted";
 
     [SerializeField]
-    private GameObject _target;
+    private bool _canCastSurrounded;
+
+    private bool _isBusy;
+    private bool _isInitialized;
 
     [SerializeField]
-    private HexUnit _owner;
+    private bool _isSubSkill;
 
     [SerializeField]
     private int _mpCost;
 
     [SerializeField]
-    private bool _isSubSkill;
-
-    private bool _isBusy;
-
-    [SerializeField]
-    private bool _canCastSurrounded;
-
-    private bool _isInitialized;
+    private HexUnit _owner;
 
     [SerializeField]
     private string _skillName;
+
+    [SerializeField]
+    private GameObject _target;
+
+    #endregion
+
+    #region Properties
 
     public GameObject Target
     {
@@ -45,7 +45,7 @@ public class Ability : MonoBehaviour
                 if (gameObject.activeInHierarchy)
                 {
                     //Use interfaces instead of send message for type safety.
-                    foreach (IOnTargetSelected onTargetSelected in GetComponents(typeof(IOnTargetSelected)))
+                    foreach (IOnTargetSelected onTargetSelected in GetComponents(typeof (IOnTargetSelected)))
                     {
                         onTargetSelected.OnTargetSelectionChanged(_target);
                     }
@@ -89,13 +89,17 @@ public class Ability : MonoBehaviour
         get { return _isSubSkill; }
     }
 
-    void Awake()
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
         if (Owner == null)
             _owner = GetComponentInParent<HexUnit>();
     }
 
-    void Start()
+    private void Start()
     {
         Init();
     }
@@ -144,8 +148,10 @@ public class Ability : MonoBehaviour
         else Debug.LogWarning("Can not deactivate a skill while it is busy!");
     }
 
-    void DeactivatInternal()
+    private void DeactivatInternal()
     {
         gameObject.SetActive(false);
     }
+
+    #endregion
 }

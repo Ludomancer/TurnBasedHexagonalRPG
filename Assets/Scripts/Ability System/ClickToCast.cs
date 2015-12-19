@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.iOS;
+﻿using UnityEngine;
 
-class ClickToCast : CastAbility
+internal class ClickToCast : CastAbility
 {
-    void LateUpdate()
+    #region Other Members
+
+    private void LateUpdate()
     {
 #if UNITY_EDITOR
         if (Input.GetMouseButtonDown(0))
@@ -24,4 +22,6 @@ class ClickToCast : CastAbility
         }
 #endif
     }
+
+    #endregion
 }

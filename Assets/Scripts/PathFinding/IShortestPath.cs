@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+
 /// <summary>
 /// Interface for a shortest path problem
 /// </summary>
 public interface IShortestPath<TState, TAction>
 {
+    #region Other Members
+
     /// <summary>
     /// Should return a estimate of shortest distance. The estimate must me admissible (never overestimate)
     /// </summary>
@@ -33,4 +36,6 @@ public interface IShortestPath<TState, TAction>
     /// Default value for TAction.
     /// </summary>
     TAction DefaultValue();
+
+    #endregion
 }

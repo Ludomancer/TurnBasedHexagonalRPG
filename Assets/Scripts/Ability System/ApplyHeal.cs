@@ -1,21 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
-[RequireComponent(typeof(Ability))]
-class ApplyHeal : MonoBehaviour, IAppliable
+[RequireComponent(typeof (Ability))]
+internal class ApplyHeal : MonoBehaviour, IAppliable
 {
+    #region Fields
+
     [SerializeField]
     private int _healAmount;
 
-    void Awake()
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
 #if UNITY_EDITOR
         if (GetComponents<ApplyHeal>().Length > 1) throw new Exception("An ability can only have 1 ApplyHeal");
 #endif
     }
+
+    #endregion
+
+    #region IAppliable Members
 
     public void Apply()
     {
@@ -23,4 +30,6 @@ class ApplyHeal : MonoBehaviour, IAppliable
         if (!target) throw new Exception("ApplyHeal requirest HexUnit as Ability target");
         target.HealthLeft += _healAmount;
     }
+
+    #endregion
 }

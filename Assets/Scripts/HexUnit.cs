@@ -2,49 +2,52 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Settworks.Hexagons;
-using Random = UnityEngine.Random;
+using UnityEngine;
 
 public class HexUnit : Destructable
 {
+    #region Fields
+
     public const string ON_DODGED = "OnDodged";
-
-    [SerializeField]
-    private string _uniqueName;
-
-    [SerializeField]
-    private Ability _meleeAttack;
-
-    [SerializeField]
-    private Ability _rangedAttack;
-
-    [SerializeField]
-    private short _movementRange;
+    public const string ON_MOVE_COMPLETED = "OnMoveCompleted";
+    private int _activeSkillIndex = -1;
 
     [SerializeField]
     private int _armor;
 
     [SerializeField]
-    private int _mp;
+    private float _dodgeChance;
+
+    private bool _isBusy;
 
     [SerializeField]
-    private float _dodgeChance;
+    private Ability _meleeAttack;
+
+    [SerializeField]
+    private short _movementRange;
 
     [SerializeField]
     private float _movementSpeed;
 
     [SerializeField]
-    private Ability[] _skills;
-
-    private int _activeSkillIndex = -1;
+    private int _mp;
 
     [SerializeField]
     private int _ownerId;
 
-    private bool _isBusy;
-    public const string ON_MOVE_COMPLETED = "OnMoveCompleted";
+    [SerializeField]
+    private Ability _rangedAttack;
 
+    [SerializeField]
+    private Ability[] _skills;
+
+    [SerializeField]
+    private string _uniqueName;
+
+    #endregion
+
+    #region Properties
 
     public float DodgeChance
     {
@@ -109,7 +112,11 @@ public class HexUnit : Destructable
         get { return _mp; }
     }
 
-    void Awake()
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
         if (Skills.Length > 8) throw new Exception("A unit can not have more than 8 skills.");
         if (_meleeAttack)
@@ -130,7 +137,7 @@ public class HexUnit : Destructable
         _transform = transform;
     }
 
-    void Start()
+    private void Start()
     {
         ToggleWeapons(false);
     }
@@ -165,7 +172,6 @@ public class HexUnit : Destructable
         if (activeAbility) activeAbility.Deactivate();
     }
 
-
     public Ability ActiveSkill()
     {
         return Skills.Length == 0 || _activeSkillIndex == -1 ? null : Skills[_activeSkillIndex];
@@ -188,12 +194,14 @@ public class HexUnit : Destructable
 
     public void FaceRight()
     {
-        _transform.localScale = new Vector3(_transform.localScale.x, _transform.localScale.y, -Mathf.Abs(_transform.localScale.z));
+        _transform.localScale = new Vector3(_transform.localScale.x, _transform.localScale.y,
+            -Mathf.Abs(_transform.localScale.z));
     }
 
     public void FaceLeft()
     {
-        _transform.localScale = new Vector3(_transform.localScale.x, _transform.localScale.y, Mathf.Abs(-_transform.localScale.z));
+        _transform.localScale = new Vector3(_transform.localScale.x, _transform.localScale.y,
+            Mathf.Abs(-_transform.localScale.z));
     }
 
     public void Move(HexTile selfHexTile, List<HexCoord> path, HexGrid hexGrid)
@@ -220,7 +228,7 @@ public class HexUnit : Destructable
             });
     }
 
-    IEnumerator MoveRoutine(HexTile selfHexTile, List<HexCoord> path, HexGrid hexGrid)
+    private IEnumerator MoveRoutine(HexTile selfHexTile, List<HexCoord> path, HexGrid hexGrid)
     {
         _isBusy = true;
         foreach (HexCoord node in path)
@@ -241,4 +249,6 @@ public class HexUnit : Destructable
         _isBusy = false;
         Messenger.Broadcast(ON_MOVE_COMPLETED, (Component)this, true);
     }
+
+    #endregion
 }

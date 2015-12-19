@@ -1,40 +1,43 @@
 ﻿using System;
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
 using MiniJSON;
 using Settworks.Hexagons;
+using UnityEngine;
 
 public class GameManager : Manager
 {
+    #region Fields
+
     public const string UNIT_SELECTION_CHANGED_EVENT_NAME = "OnUnitSelectionChanged";
     public const string GAME_STATE_CHANGED_EVENT_NAME = "OnGameStateChanged";
-
-    [SerializeField, Range(1, 3)]
-    private int _maxSpawnDistance = 2;
+    //The unit to be played this turn.
+    private HexUnit _activeUnit;
+    private GameState _currentGameState;
+    private HexGrid _hexGrid;
 
     [SerializeField, Range(1, 10)]
     private int _maxArmySize = 5;
 
-    private GameState _currentGameState;
-
-    private HexGrid _hexGrid;
-    private readonly List<HexTile> _cachedOtherHexes = new List<HexTile>();
-    private readonly List<HexTile> _cachedMoves = new List<HexTile>();
-    private readonly List<HexTile> _cachedDirectActions = new List<HexTile>();
-    private readonly List<HexTile> _cachedDirectAttacks = new List<HexTile>();
-    private readonly List<Tuple<HexTile, HexTile>> _cachedMoveActions = new List<Tuple<HexTile, HexTile>>();
-    private readonly Queue<Action> _queuedActions = new Queue<Action>();
+    [SerializeField, Range(1, 3)]
+    private int _maxSpawnDistance = 2;
 
     private HexTile _selectedHex;
     //The unit selected by player, can not be commanded.
     private HexUnit _selectedUnit;
-    //The unit to be played this turn.
-    private HexUnit _activeUnit;
     private ShortestPathGraphSearch<HexCoord, HexCoord> pathGraphSearch;
+    private readonly List<HexTile> _cachedDirectActions = new List<HexTile>();
+    private readonly List<HexTile> _cachedDirectAttacks = new List<HexTile>();
+    private readonly List<Tuple<HexTile, HexTile>> _cachedMoveActions = new List<Tuple<HexTile, HexTile>>();
+    private readonly List<HexTile> _cachedMoves = new List<HexTile>();
+    private readonly List<HexTile> _cachedOtherHexes = new List<HexTile>();
+    private readonly Queue<Action> _queuedActions = new Queue<Action>();
+
+    #endregion
+
+    #region Properties
 
     protected HexUnit SelectedUnit
     {
@@ -58,7 +61,11 @@ public class GameManager : Manager
         }
     }
 
-    void Start()
+    #endregion
+
+    #region Other Members
+
+    private void Start()
     {
         _hexGrid = FindObjectOfType<HexGrid>();
         if (_hexGrid == null) throw new Exception("No HexGrid found on the Scene.");
@@ -86,8 +93,7 @@ public class GameManager : Manager
         HighlightActiveHex();
     }
 
-
-    IEnumerator ArmyBuild()
+    private IEnumerator ArmyBuild()
     {
         int armySize = LoadArmyData();
         //Give everyone else time to register to events.
@@ -98,8 +104,12 @@ public class GameManager : Manager
         for (int i = 0; i < armySize; i++)
         {
             int turn = TurnManager.Instance.CurrentTurn;
-            Vector2 topLeftHex = Camera.main.WorldToScreenPoint(_hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect(0, 0).Coord));
-            Vector2 bottomRightHex = Camera.main.WorldToScreenPoint(_hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect(_hexGrid.WidthInHexes - 1, _hexGrid.HeightInHexes - 1).Coord));
+            Vector2 topLeftHex =
+                Camera.main.WorldToScreenPoint(_hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect(0, 0).Coord));
+            Vector2 bottomRightHex =
+                Camera.main.WorldToScreenPoint(
+                    _hexGrid.GetWorldPositionOfHex(
+                        _hexGrid.GetHexTileDirect(_hexGrid.WidthInHexes - 1, _hexGrid.HeightInHexes - 1).Coord));
             float yMax = topLeftHex.y;
             float yMin = bottomRightHex.y;
             float xMax = bottomRightHex.x;
@@ -114,12 +124,17 @@ public class GameManager : Manager
                 Func<float, float, float> limitFunction;
                 if (TurnManager.Instance.GetActivePlayer().Id % 2 == 0)
                 {
-                    refPosition = _hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect((int)(_hexGrid.WidthInHexes / 2f), _maxSpawnDistance - 1).Coord);
+                    refPosition =
+                        _hexGrid.GetWorldPositionOfHex(
+                            _hexGrid.GetHexTileDirect((int)(_hexGrid.WidthInHexes / 2f), _maxSpawnDistance - 1).Coord);
                     limitFunction = Mathf.Min;
                 }
                 else
                 {
-                    refPosition = _hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect((int)(_hexGrid.WidthInHexes / 2f), _hexGrid.HeightInHexes - _maxSpawnDistance).Coord);
+                    refPosition =
+                        _hexGrid.GetWorldPositionOfHex(
+                            _hexGrid.GetHexTileDirect((int)(_hexGrid.WidthInHexes / 2f),
+                                _hexGrid.HeightInHexes - _maxSpawnDistance).Coord);
                     limitFunction = Mathf.Max;
                 }
                 float xPlayerLimit = Camera.main.WorldToScreenPoint(refPosition).x;
@@ -130,7 +145,9 @@ public class GameManager : Manager
                 //Wait until player places the Unit.
                 while (_selectedUnit != null)
                 {
-                    Vector2 rayPos = new Vector2(limitFunction(xPlayerLimit, Mathf.Clamp(Input.mousePosition.x, xMin, xMax)), Mathf.Clamp(Input.mousePosition.y, yMin, yMax));
+                    Vector2 rayPos =
+                        new Vector2(limitFunction(xPlayerLimit, Mathf.Clamp(Input.mousePosition.x, xMin, xMax)),
+                            Mathf.Clamp(Input.mousePosition.y, yMin, yMax));
                     Ray ray = Camera.main.ScreenPointToRay(rayPos);
                     RaycastHit hit;
                     if (Physics.Raycast(ray, out hit))
@@ -157,9 +174,10 @@ public class GameManager : Manager
         SelectHex(_selectedHex);
     }
 
-    int LoadArmyData()
+    private int LoadArmyData()
     {
-        TextAsset unitDataFile = Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, "Army"), typeof(TextAsset)) as TextAsset;
+        TextAsset unitDataFile =
+            Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, "Army"), typeof (TextAsset)) as TextAsset;
         if (unitDataFile)
         {
             Dictionary<string, object> rawData = Json.Deserialize(unitDataFile.text) as Dictionary<string, object>;
@@ -189,7 +207,6 @@ public class GameManager : Manager
 
     public override void Init()
     {
-
     }
 
     private void OnHexClicked(HexTile targetHex)
@@ -293,7 +310,6 @@ public class GameManager : Manager
                     _activeUnit.Move(_selectedHex, shortestPath, _hexGrid);
                     return;
                 }
-
             }
             SelectHex(targetHex);
         }
@@ -376,7 +392,9 @@ public class GameManager : Manager
             ResetActiveHexes();
 
             //Mark movement range. Allows occupied hex in the last node.
-            foreach (HexTile hexTile in _hexGrid.HexesInReachableRange(_selectedHex.Coord, _selectedUnit.MovementRange, true))
+            foreach (
+                HexTile hexTile in _hexGrid.HexesInReachableRange(_selectedHex.Coord, _selectedUnit.MovementRange, true)
+                )
             {
                 //Only check for attack positions if its the active unit and can melee attack.
                 if (hexTile.IsOccupied && _selectedUnit == _activeUnit && _selectedUnit.MeleeAttack)
@@ -485,4 +503,6 @@ public class GameManager : Manager
         }
         _cachedMoves.Clear();
     }
+
+    #endregion
 }

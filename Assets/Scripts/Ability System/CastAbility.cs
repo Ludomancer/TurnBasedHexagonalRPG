@@ -1,23 +1,29 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
-[RequireComponent(typeof(Ability))]
-abstract class CastAbility : MonoBehaviour
+[RequireComponent(typeof (Ability))]
+internal abstract class CastAbility : MonoBehaviour
 {
-    protected Ability _ability;
+    #region Fields
 
-    protected bool _isBusy = false;
+    protected Ability _ability;
+    protected bool _isBusy;
+
+    #endregion
+
+    #region Properties
 
     public bool IsBusy
     {
         get { return _isBusy; }
     }
 
-    void Awake()
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
         _ability = GetComponent<Ability>();
 #if UNITY_EDITOR
@@ -26,7 +32,9 @@ abstract class CastAbility : MonoBehaviour
         Init();
     }
 
-    protected virtual void Init() { }
+    protected virtual void Init()
+    {
+    }
 
     public virtual void Cast()
     {
@@ -40,7 +48,7 @@ abstract class CastAbility : MonoBehaviour
     {
         _isBusy = true;
         //Use interfaces instead of send message for type safety.
-        Component[] castables = GetComponents(typeof(ICastable));
+        Component[] castables = GetComponents(typeof (ICastable));
         for (int i = 0; i < castables.Length; i++)
         {
             ((ICastable)castables[i]).Cast();
@@ -65,4 +73,6 @@ abstract class CastAbility : MonoBehaviour
 
         _ability.AbilityCastCompleted(true);
     }
+
+    #endregion
 }
