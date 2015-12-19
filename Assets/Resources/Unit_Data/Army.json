@@ -1,3 +1,5 @@
 {
-  "name0": "UnitMelee"
+    "name0": "UnitHealer",
+    "name1": "UnitMelee",
+    "name2": "UnitRanged"
 }

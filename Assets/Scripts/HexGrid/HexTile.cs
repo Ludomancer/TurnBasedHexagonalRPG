@@ -106,7 +106,7 @@ public class HexTile : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Messenger.Broadcast<HexTile>(ON_HEX_CLICKED_EVENT_NAME, this);
+        Messenger.Broadcast(ON_HEX_CLICKED_EVENT_NAME, this);
     }
 
     [Serializable]

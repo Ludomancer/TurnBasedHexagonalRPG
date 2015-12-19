@@ -32,10 +32,11 @@ public class Destructable : MonoBehaviour
         get { return _healthLeft; }
         set
         {
+            if (value > MaxHealth) value = MaxHealth;
             if (_healthLeft != value)
             {
+                Messenger.Broadcast(ON_HEALTH_CHANGED, this, value - _healthLeft);
                 _healthLeft = value;
-                Messenger.Broadcast(ON_HEALTH_CHANGED, this, _healthLeft, MaxHealth);
             }
         }
     }
@@ -47,6 +48,7 @@ public class Destructable : MonoBehaviour
 
     public virtual void Reset()
     {
-        HealthLeft = MaxHealth;
+        //Don't trigger event.
+        _healthLeft = MaxHealth;
     }
 }

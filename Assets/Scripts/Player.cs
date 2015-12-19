@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
     private bool _isAiControlled;
     private int _id = -1;
 
-    List<HexUnit> _units = new List<HexUnit>();
+    readonly ListQueue<HexUnit> _units = new ListQueue<HexUnit>();
 
     public int Id
     {
@@ -27,22 +27,31 @@ public class Player : MonoBehaviour
         _isAiControlled = isAiControlled;
     }
 
-    public void AddUnit(HexUnit newUnit)
+    public void Enqueue(HexUnit newUnit)
     {
         if (newUnit == null) throw new NullReferenceException("newUnit is null!");
         newUnit.OwnerId = Id;
-        _units.Add(newUnit);
+        _units.Enqueue(newUnit);
     }
 
-    public void RemoveUnit(HexUnit unit)
-    {
-        if (unit == null) throw new NullReferenceException("unit is null!");
-        _units.Remove(unit);
-    }
-
-    public HexUnit GetUnit(int i)
+    public HexUnit PeekUnit(int i)
     {
         return _units[i];
+    }
+
+    public HexUnit GetNextUnit()
+    {
+        HexUnit hexUnit = _units.Dequeue();
+        hexUnit.SelectSkill(-1);
+        hexUnit.ToggleWeapons(true);
+        _units.Enqueue(hexUnit);
+        return hexUnit;
+    }
+
+    public void RemoveUnit(HexUnit hexUnit)
+    {
+        hexUnit.OwnerId = -1;
+        _units.Remove(hexUnit);
     }
 
     public int UnitCount

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using MiniJSON;
 using Settworks.Hexagons;
 
@@ -12,20 +13,27 @@ public class GameManager : Manager
     public const string UNIT_SELECTION_CHANGED_EVENT_NAME = "OnUnitSelectionChanged";
     public const string GAME_STATE_CHANGED_EVENT_NAME = "OnGameStateChanged";
 
-    //TODO: make this calculate from grids instead of fixed value.
-    [SerializeField, Range(0.15f, 0.40f)]
-    private float _maxSpawnArea = 0.15f;
+    [SerializeField, Range(1, 3)]
+    private int _maxSpawnDistance = 2;
+
+    [SerializeField, Range(1, 10)]
+    private int _maxArmySize = 5;
 
     private GameState _currentGameState;
 
     private HexGrid _hexGrid;
     private readonly List<HexTile> _cachedOtherHexes = new List<HexTile>();
-    private readonly List<HexTile> _cachedMoveHexes = new List<HexTile>();
-    private readonly List<Tuple<HexTile, HexTile>> _cachedAttackHexes = new List<Tuple<HexTile, HexTile>>();
+    private readonly List<HexTile> _cachedMoves = new List<HexTile>();
+    private readonly List<HexTile> _cachedDirectActions = new List<HexTile>();
+    private readonly List<HexTile> _cachedDirectAttacks = new List<HexTile>();
+    private readonly List<Tuple<HexTile, HexTile>> _cachedMoveActions = new List<Tuple<HexTile, HexTile>>();
     private readonly Queue<Action> _queuedActions = new Queue<Action>();
 
     private HexTile _selectedHex;
+    //The unit selected by player, can not be commanded.
     private HexUnit _selectedUnit;
+    //The unit to be played this turn.
+    private HexUnit _activeUnit;
     private ShortestPathGraphSearch<HexCoord, HexCoord> pathGraphSearch;
 
     protected HexUnit SelectedUnit
@@ -59,9 +67,25 @@ public class GameManager : Manager
         TurnManager.Instance.Init();
 
         Messenger.AddListener<HexTile>(HexTile.ON_HEX_CLICKED_EVENT_NAME, OnHexClicked);
+        Messenger.AddListener<Ability>(Ability.ON_ABILITY_ACTIVATED, OnAbilityActivated);
+        Messenger.AddListener<Ability>(Ability.ON_ABILITY_DEACTIVATED, OnAbilityDeactivated);
+        Messenger.AddListener<Component, bool>(Ability.ON_CAST_COMPLETED, OnActionCompletedCallback);
+        Messenger.AddListener<Component, bool>(HexUnit.ON_MOVE_COMPLETED, OnActionCompletedCallback);
 
         StartCoroutine(ArmyBuild());
     }
+
+    private void OnAbilityDeactivated(Ability ability)
+    {
+        //Only do that if no active skills selected. Otherwise OnAbilityActivated will handle it.
+        if (!_activeUnit.ActiveSkill()) HighlightActiveHex();
+    }
+
+    private void OnAbilityActivated(Ability ability)
+    {
+        HighlightActiveHex();
+    }
+
 
     IEnumerator ArmyBuild()
     {
@@ -74,23 +98,44 @@ public class GameManager : Manager
         for (int i = 0; i < armySize; i++)
         {
             int turn = TurnManager.Instance.CurrentTurn;
+            Vector2 topLeftHex = Camera.main.WorldToScreenPoint(_hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect(0, 0).Coord));
+            Vector2 bottomRightHex = Camera.main.WorldToScreenPoint(_hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect(_hexGrid.WidthInHexes - 1, _hexGrid.HeightInHexes - 1).Coord));
+            float yMax = topLeftHex.y;
+            float yMin = bottomRightHex.y;
+            float xMax = bottomRightHex.x;
+            float xMin = topLeftHex.x;
             while (turn == TurnManager.Instance.CurrentTurn)
             {
-                SelectedUnit = TurnManager.Instance.GetActivePlayer().GetUnit(i);
+                SelectedUnit = TurnManager.Instance.GetActivePlayer().GetNextUnit();
                 _selectedUnit.gameObject.SetActive(true);
-                gameHud.ShowPopup("Place Unit", new Vector2(Screen.width / 2f, Screen.height / 2f));
+                gameHud.ShowPopup("Place Unit", new Vector2(0.5f, 0.5f), Color.white);
+
+                Vector3 refPosition;
+                Func<float, float, float> limitFunction;
+                if (TurnManager.Instance.GetActivePlayer().Id % 2 == 0)
+                {
+                    refPosition = _hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect((int)(_hexGrid.WidthInHexes / 2f), _maxSpawnDistance - 1).Coord);
+                    limitFunction = Mathf.Min;
+                }
+                else
+                {
+                    refPosition = _hexGrid.GetWorldPositionOfHex(_hexGrid.GetHexTileDirect((int)(_hexGrid.WidthInHexes / 2f), _hexGrid.HeightInHexes - _maxSpawnDistance).Coord);
+                    limitFunction = Mathf.Max;
+                }
+                float xPlayerLimit = Camera.main.WorldToScreenPoint(refPosition).x;
+
+                Transform selectedUnitTransform = _selectedUnit.transform;
+                selectedUnitTransform.position = refPosition;
+
                 //Wait until player places the Unit.
                 while (_selectedUnit != null)
                 {
-                    RaycastHit hit;
-                    Vector2 rayPos;
-                    if (TurnManager.Instance.GetActivePlayer().Id % 2 == 0) rayPos = new Vector2(Mathf.Min(Screen.width * _maxSpawnArea, Input.mousePosition.x), Input.mousePosition.y);
-                    else rayPos = new Vector2(Mathf.Max(Screen.width * (1f - _maxSpawnArea), Input.mousePosition.x), Input.mousePosition.y);
+                    Vector2 rayPos = new Vector2(limitFunction(xPlayerLimit, Mathf.Clamp(Input.mousePosition.x, xMin, xMax)), Mathf.Clamp(Input.mousePosition.y, yMin, yMax));
                     Ray ray = Camera.main.ScreenPointToRay(rayPos);
-
+                    RaycastHit hit;
                     if (Physics.Raycast(ray, out hit))
                     {
-                        _selectedUnit.transform.position = hit.point;
+                        selectedUnitTransform.position = hit.point;
                     }
                     yield return null;
                 }
@@ -101,11 +146,15 @@ public class GameManager : Manager
         WaitForSeconds wait = new WaitForSeconds(1f);
         for (int i = 3; i >= 0; i--)
         {
-            gameHud.ShowPopup(i == 0 ? "Battle!" : i.ToString(), new Vector2(Screen.width / 2f, Screen.height / 2f));
+            gameHud.ShowPopup(i == 0 ? "Battle!" : i.ToString(), new Vector2(0.5f, 0.5f), Color.white);
             yield return wait;
         }
 
         CurrentGameState = GameState.Battle;
+
+        _activeUnit = TurnManager.Instance.GetActivePlayer().GetNextUnit();
+        _selectedHex = _activeUnit.GetHexTile(_hexGrid);
+        SelectHex(_selectedHex);
     }
 
     int LoadArmyData()
@@ -115,7 +164,7 @@ public class GameManager : Manager
         {
             Dictionary<string, object> rawData = Json.Deserialize(unitDataFile.text) as Dictionary<string, object>;
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < _maxArmySize; i++)
             {
                 string unitKey = UnitCard.UNIT_NAME_KEY + i;
                 if (rawData != null && rawData.ContainsKey(unitKey))
@@ -124,31 +173,23 @@ public class GameManager : Manager
                     for (int j = 0; j < TurnManager.Instance.PlayerCount; j++)
                     {
                         GameObject newUnit = PoolManager.instance.GetObjectForName(unitName, false);
-                        if (j % 2 == 0) newUnit.transform.localScale = new Vector3(1, 1, -1);
-                        TurnManager.Instance.GetPlayer(j).AddUnit(newUnit.GetComponent<HexUnit>());
+                        HexUnit hexUnit = newUnit.GetComponent<HexUnit>();
+                        if (j % 2 == 0) hexUnit.FaceRight();
+                        else hexUnit.FaceLeft();
+                        TurnManager.Instance.GetPlayer(j).Enqueue(hexUnit);
                         newUnit.SetActive(false);
                     }
                 }
                 else return i;
             }
-            return 5;
+            return _maxArmySize;
         }
-        return 0;
+        return -1;
     }
 
     public override void Init()
     {
 
-    }
-
-    private void OnHexClickedBuild(HexTile targetHex)
-    {
-        if (targetHex.IsPassable)
-        {
-            _selectedUnit.transform.position = targetHex.transform.position;
-            targetHex.OccupyingObject = _selectedUnit.gameObject;
-            SelectedUnit = null;
-        }
     }
 
     private void OnHexClicked(HexTile targetHex)
@@ -170,6 +211,25 @@ public class GameManager : Manager
         }
     }
 
+    private void OnHexClickedBuild(HexTile targetHex)
+    {
+        if (TurnManager.Instance.GetActivePlayer().Id % 2 == 0)
+        {
+            if (targetHex.Coord.r >= _maxSpawnDistance) return;
+        }
+        else
+        {
+            if (_hexGrid.HeightInHexes - _maxSpawnDistance > targetHex.Coord.r) return;
+        }
+
+        if (targetHex.IsPassable)
+        {
+            _selectedUnit.transform.position = targetHex.transform.position;
+            targetHex.OccupyingObject = _selectedUnit.gameObject;
+            SelectedUnit = null;
+        }
+    }
+
     /// <summary>
     /// To be called, when a Hex is clicked while the game is in Battle state.
     /// Processes and decides how the input should be handled.
@@ -184,60 +244,83 @@ public class GameManager : Manager
         }
 
         //Still animating.
-        if (_selectedUnit.IsBusy) return;
-
-        //Only allow commanding if the unit is ours.
-        if (_selectedUnit.OwnerId != TurnManager.Instance.GetActivePlayer().Id)
-        {
-            SelectHex(targetHex);
-            return;
-        }
+        if (_activeUnit.IsBusy || _activeUnit.IsAnySkillBusy) return;
 
         if (targetHex.IsOccupied)
         {
             HexUnit occupyingUnit = targetHex.OccupyingObject.GetComponent<HexUnit>();
-            if (occupyingUnit && _selectedUnit.HasAttack() && occupyingUnit.OwnerId != TurnManager.Instance.GetActivePlayer().Id)
-            {
-                Tuple<HexTile, HexTile> attackTouple = new Tuple<HexTile, HexTile>(_selectedHex, targetHex);
-                HexUnit targetTileUnit = targetHex.OccupyingObject.GetComponent<HexUnit>();
 
-                //Can we attack directly?
-                if (_cachedAttackHexes.Contains(attackTouple))
+            if (occupyingUnit)
+            {
+                //Ability will handle it.
+                if (_cachedDirectActions.Contains(targetHex)) return;
+
+                if (_cachedDirectAttacks.Contains(targetHex))
                 {
-                    _selectedUnit.Attack(_selectedHex.Coord, targetHex.Coord, _hexGrid, targetTileUnit, OnActionCompletedCallback);
+                    //Deactivate active ability to prevent double cast.
+                    Ability activeSkill = _activeUnit.ActiveSkill();
+                    if (activeSkill) activeSkill.Deactivate();
+
+                    if (_activeUnit.RangedAttack)
+                    {
+                        if (HexCoord.Distance(targetHex.Coord, _selectedHex.Coord) > 1)
+                        {
+                            _activeUnit.MeleeAttack.Deactivate();
+                            _activeUnit.RangedAttack.ActivateAutoCast(occupyingUnit.gameObject);
+                            return;
+                        }
+                        _activeUnit.RangedAttack.Deactivate();
+                    }
+                    _activeUnit.MeleeAttack.ActivateAutoCast(occupyingUnit.gameObject);
                     return;
                 }
 
                 //Look if we can melee attack with movement.
-                Tuple<HexTile, HexTile> tuple = _cachedAttackHexes.FirstOrDefault(c => c.second == targetHex);
-                if (tuple != null)
+                //Only check cached attack tuples found with Breadth First Search.
+                List<HexCoord> shortestPath = null;
+                foreach (Tuple<HexTile, HexTile> tuple in _cachedMoveActions.Where(c => c.second == targetHex))
                 {
-                    _queuedActions.Enqueue(() => _selectedUnit.Attack(tuple.first.Coord, targetHex.Coord, _hexGrid, targetTileUnit, OnActionCompletedCallback));
                     List<HexCoord> path = pathGraphSearch.GetShortestPath(_selectedHex.Coord, tuple.first.Coord);
-                    if (path != null && path.Count > 0) _selectedUnit.Move(_selectedHex, path, _hexGrid, OnActionCompletedCallback);
+                    if (shortestPath == null) shortestPath = path;
+                    else if (shortestPath.Count > path.Count) shortestPath = path;
+
+                    //Can't find a shorter path, early exit.
+                    if (shortestPath.Count == 1) break;
+                }
+                if (shortestPath != null && shortestPath.Count > 0)
+                {
+                    _queuedActions.Enqueue(() => _activeUnit.MeleeAttack.ActivateAutoCast(occupyingUnit.gameObject));
+                    _activeUnit.Move(_selectedHex, shortestPath, _hexGrid);
                     return;
                 }
+
             }
             SelectHex(targetHex);
         }
         else
         {
             //If we can move there, move.
-            if (_cachedMoveHexes.Contains(targetHex))
+            if (_cachedMoves.Contains(targetHex))
             {
                 List<HexCoord> path = pathGraphSearch.GetShortestPath(_selectedHex.Coord, targetHex.Coord);
-                if (path != null && path.Count > 0) _selectedUnit.Move(_selectedHex, path, _hexGrid, OnActionCompletedCallback);
+                if (path != null && path.Count > 0) _activeUnit.Move(_selectedHex, path, _hexGrid);
             }
             else SelectHex(targetHex);
         }
     }
 
     /// <summary>
-    /// Called after a Move or Attack command is finished execuing until all the queued messages are processed.
+    /// Called after completion of a command is finished execuing until all the queued messages are processed.
     /// When no queued Actions left, it ends the turn for the Active player and clears player/turn specific data.
     /// </summary>
-    private void OnActionCompletedCallback()
+    private void OnActionCompletedCallback(Component sender, bool isSuccess)
     {
+        if (!isSuccess)
+        {
+            GameHud gameHud = GuiManager.Instance.CurrentState as GameHud;
+            if (gameHud != null) gameHud.ShowPopup(sender.name + " has failed!", new Vector2(0.5f, 0.5f), Color.red);
+        }
+
         if (_queuedActions.Count > 0)
         {
             _queuedActions.Dequeue().Invoke();
@@ -245,9 +328,11 @@ public class GameManager : Manager
         else
         {
             ResetActiveHexes();
-            SelectedUnit = null;
             _selectedHex = null;
             TurnManager.Instance.EndTurn();
+            _activeUnit = TurnManager.Instance.GetActivePlayer().GetNextUnit();
+            _selectedHex = _activeUnit.GetHexTile(_hexGrid);
+            SelectHex(_selectedHex);
         }
     }
 
@@ -262,7 +347,7 @@ public class GameManager : Manager
             HexUnit occupyingUnit = toSelectCenter.OccupyingObject.GetComponent<HexUnit>();
             SelectedUnit = occupyingUnit;
         }
-        else SelectedUnit = null;
+        else SelectedUnit = _activeUnit;
         _selectedHex = toSelectCenter;
 
         HighlightActiveHex();
@@ -277,8 +362,10 @@ public class GameManager : Manager
         {
             return;
         }
-        //If hex contains a unit
-        if (!_selectedUnit)
+
+        HexUnit hexUnit = null;
+        if (_selectedHex.OccupyingObject) hexUnit = _selectedHex.OccupyingObject.GetComponent<HexUnit>();
+        if (!hexUnit)
         {
             ResetActiveHexes();
             _cachedOtherHexes.Add(_selectedHex);
@@ -291,86 +378,111 @@ public class GameManager : Manager
             //Mark movement range. Allows occupied hex in the last node.
             foreach (HexTile hexTile in _hexGrid.HexesInReachableRange(_selectedHex.Coord, _selectedUnit.MovementRange, true))
             {
-                if (hexTile.IsOccupied)
+                //Only check for attack positions if its the active unit and can melee attack.
+                if (hexTile.IsOccupied && _selectedUnit == _activeUnit && _selectedUnit.MeleeAttack)
                 {
-                    HexUnit hexUnit = hexTile.OccupyingObject.GetComponent<HexUnit>();
+                    hexUnit = hexTile.OccupyingObject.GetComponent<HexUnit>();
                     if (hexUnit == null || hexUnit.OwnerId == _selectedUnit.OwnerId || hexUnit.IsDead) continue;
                     //Melee attackable enemy found.
                     //Find previous move hex.
                     foreach (HexCoord neighbor in hexTile.Coord.Neighbors())
                     {
+                        if (!_hexGrid.IsCordinateValid(neighbor)) continue;
                         HexTile neighborHexTile = _hexGrid.GetHexTile(neighbor);
-                        if (!_cachedMoveHexes.Contains(neighborHexTile)) continue;
-                        _cachedAttackHexes.Add(new Tuple<HexTile, HexTile>(neighborHexTile, hexTile));
+                        if (!_cachedMoves.Contains(neighborHexTile)) continue;
+                        Tuple<HexTile, HexTile> meleeAttackTuple = new Tuple<HexTile, HexTile>(neighborHexTile, hexTile);
+                        if (!_cachedMoveActions.Contains(meleeAttackTuple)) _cachedMoveActions.Add(meleeAttackTuple);
                         hexTile.HighlightTile(Color.red);
-                        break;
                     }
                 }
                 else
                 {
                     //Mark move hex.
-                    _cachedMoveHexes.Add(hexTile);
-                    if (_selectedUnit.OwnerId == TurnManager.Instance.GetActivePlayer().Id) hexTile.HighlightTile();
-                    else hexTile.HighlightTile(Color.blue);
+                    //Cache into other if it not the currently active unit.
+                    if (_selectedUnit == _activeUnit)
+                    {
+                        _cachedMoves.Add(hexTile);
+                        hexTile.HighlightTile();
+                    }
+                    else
+                    {
+                        _cachedOtherHexes.Add(hexTile);
+                        hexTile.HighlightTile(Color.blue);
+                    }
                 }
             }
 
-            //TODO: Optimize here!
-            //Decide if we can use ranged attack, if not fallback to melee attack.
-            Attack attackMode = !_selectedUnit.RangedAttack || _selectedHex.Coord.Neighbors()
-                .Any(hex =>
-                {
-                    HexTile hexTile = _hexGrid.GetHexTile(hex);
-                    if (hexTile.OccupyingObject)
-                    {
-                        HexUnit hexUnit = hexTile.OccupyingObject.GetComponent<HexUnit>();
-                        return hexUnit != null && hexUnit.OwnerId != _selectedUnit.OwnerId && !hexUnit.IsDead;
-                    }
-                    return false;
-                }) ? _selectedUnit.MeleeAttack : _selectedUnit.RangedAttack;
-
-            //Mark attackable units
-            if (attackMode)
+            //Only show attack and skill marking if the selected unit is active Unit.
+            if (_selectedUnit == _activeUnit)
             {
-                foreach (
-                    HexTile hexTile in
-                        _hexGrid.HexesInRange(_selectedHex.Coord, attackMode.MinRange, attackMode.MaxRange)
-                            .Where(tile =>
-                            {
-                                if (tile.OccupyingObject)
-                                {
-                                    HexUnit hexUnit = tile.OccupyingObject.GetComponent<HexUnit>();
-                                    return hexUnit != null && hexUnit.OwnerId != _selectedUnit.OwnerId && !hexUnit.IsDead;
-                                }
-                                else return false;
-                            }))
+                //Show active skilll.
+                HighlightAndCache(_activeUnit.ActiveSkill(), Color.cyan, _cachedDirectActions);
+                //Show melee attack.
+                HighlightAndCache(_activeUnit.MeleeAttack, Color.red, _cachedDirectAttacks);
+                //Show ranged attack.
+                HighlightAndCache(_activeUnit.RangedAttack, Color.red, _cachedDirectAttacks);
+            }
+
+            //Always highlight Active Unit.
+            if (!_cachedDirectActions.Contains(_selectedHex))
+            {
+                if (!_cachedOtherHexes.Contains(_selectedHex))
+                    _cachedOtherHexes.Add(_selectedHex);
+                _selectedHex.HighlightTile(Color.white);
+            }
+        }
+    }
+
+    private void HighlightAndCache(Ability ability, Color c, List<HexTile> cache)
+    {
+        if (!ability) return;
+        AbilityAim aim = ability.GetComponent<AbilityAim>();
+        List<HexTile> availableHexTiles = aim.GetAvailableHexes(_hexGrid);
+        if (availableHexTiles == null) return;
+        foreach (HexTile availableHex in aim.GetAvailableHexes(_hexGrid))
+        {
+            if (!cache.Contains(availableHex))
+            {
+                if (!cache.Contains(availableHex))
                 {
-                    Tuple<HexTile, HexTile> attackTouple = new Tuple<HexTile, HexTile>(_selectedHex, hexTile);
-                    if (!_cachedAttackHexes.Contains(attackTouple)) _cachedAttackHexes.Add(attackTouple);
-                    hexTile.HighlightTile(Color.red);
+                    cache.Add(availableHex);
+                    availableHex.HighlightTile(c);
                 }
             }
         }
     }
 
-
     private void ResetActiveHexes()
     {
-        foreach (Tuple<HexTile, HexTile> hexTile in _cachedAttackHexes)
+        foreach (Tuple<HexTile, HexTile> tuple in _cachedMoveActions)
         {
             //First will be reset be cachedMoveHexes.
-            hexTile.second.AutoSetState();
+            tuple.second.AutoSetState();
         }
-        _cachedAttackHexes.Clear();
+        _cachedMoveActions.Clear();
+
+        foreach (HexTile hexTile in _cachedDirectActions)
+        {
+            hexTile.AutoSetState();
+        }
+        _cachedDirectActions.Clear();
+
+        foreach (HexTile hexTile in _cachedDirectAttacks)
+        {
+            hexTile.AutoSetState();
+        }
+        _cachedDirectAttacks.Clear();
+
         foreach (HexTile hexTile in _cachedOtherHexes)
         {
             hexTile.AutoSetState();
         }
         _cachedOtherHexes.Clear();
-        foreach (HexTile hexTile in _cachedMoveHexes)
+
+        foreach (HexTile hexTile in _cachedMoves)
         {
             hexTile.AutoSetState();
         }
-        _cachedMoveHexes.Clear();
+        _cachedMoves.Clear();
     }
 }

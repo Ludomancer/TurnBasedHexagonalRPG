@@ -31,7 +31,19 @@ internal class GameHud : PanelBase
     {
         _transform = transform;
         Messenger.AddListener<HexUnit>(GameManager.UNIT_SELECTION_CHANGED_EVENT_NAME, OnUnitSelectionChanged);
-        Messenger.AddListener<Player>(TurnManager.END_TURN_ANIM_NAME, OnEndTurn); ;
+        Messenger.AddListener<Player>(TurnManager.END_TURN_ANIM_NAME, OnEndTurn);
+        Messenger.AddListener<Destructable, int>(Destructable.ON_HEALTH_CHANGED, OnUnitHealthChanged); ;
+        Messenger.AddListener<HexUnit>(HexUnit.ON_DODGED, OnUnitDodged);
+    }
+
+    private void OnUnitDodged(HexUnit hexUnit)
+    {
+        ShowPopup("Miss!", hexUnit.transform.position, Color.white);
+    }
+
+    private void OnUnitHealthChanged(Destructable destructable, int delta)
+    {
+        ShowPopup(delta + "!", destructable.transform.position, delta > 0 ? Color.green : Color.red);
     }
 
     private void OnEndTurn(Player player)
@@ -74,26 +86,26 @@ internal class GameHud : PanelBase
         IsTransitioning = false;
     }
 
-    public void ShowScorePopup(int score, Vector3 position)
+    public void ShowPopup(string text, Vector3 position, Color c)
     {
-        if (score == 0) return;
-        ShowPopup(score.ToString(), position);
+        ShowPopup(text, (Vector2)Camera.main.WorldToViewportPoint(position), c);
     }
 
-    public void ShowPopup(string text, Vector3 position)
-    {
-        ShowPopup(text, RectTransformUtility.WorldToScreenPoint(Camera.main, position));
-    }
-
-    public void ShowPopup(string text, Vector2 screenSpace)
+    public void ShowPopup(string text, Vector2 viewportPoint, Color c)
     {
         GameObject popup = PoolManager.instance.GetObjectForName(_scorePopupPrefab.name, false, Vector3.zero, Quaternion.identity, null);
         if (popup)
         {
             popup.transform.SetParent(_transform, false);
             PopupText popupText = popup.GetComponent<PopupText>();
-            popupText.RectTransform.position = screenSpace;
-            popupText.Show(text, PopupText.DEFAULT_FADE_DELAY, PopupText.DEFAULT_FADE_OUT_DURATION);
+            popupText.RectTransform.anchorMin = viewportPoint;
+            popupText.RectTransform.anchorMax = viewportPoint;
+            popupText.Show(text,
+                PopupText.DEFAULT_FADE_DELAY,
+                PopupText.DEFAULT_FADE_IN_DURATION,
+                PopupText.DEFAULT_FADE_OUT_DURATION,
+                c, PopupText.PopupAnimMode.Scale,
+                false, false);
         }
     }
 
