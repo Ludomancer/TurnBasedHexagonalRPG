@@ -154,6 +154,24 @@ public class HexGrid : MonoBehaviour
     }
 
     /// <summary>
+    /// Return lenght of given row.
+    /// </summary>
+    /// <param name="r"></param>
+    public int GetRowLenght(int r)
+    {
+        return _hexGrid[r].Length;
+    }
+
+    /// <summary>
+    /// Return lenght of given column. Equal to HeightInHexes
+    /// </summary>
+    /// <param name="r"></param>
+    public int GetColumnLenght(int r, int q)
+    {
+        return _heightInHexes;
+    }
+
+    /// <summary>
     /// Converts HexCoord to world position according to this grid.
     /// </summary>
     /// <param name="hexCoord"></param>
@@ -248,7 +266,7 @@ public class HexGrid : MonoBehaviour
     /// <returns>Enumarates and returns found HexTiles.</returns>
     public IEnumerable<HexTile> HexesInReachableRange(HexCoord centerHex, int range, bool allowOccupiedAsLast)
     {
-        List<HexCoord> visited = new List<HexCoord> {centerHex};
+        List<HexCoord> visited = new List<HexCoord> { centerHex };
 
         Queue<HexCoord> frontier = new Queue<HexCoord>();
         frontier.Enqueue(centerHex);

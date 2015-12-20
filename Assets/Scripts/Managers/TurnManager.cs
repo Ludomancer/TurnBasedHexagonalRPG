@@ -23,7 +23,7 @@ public class TurnManager : Manager
     }
     #endregion
 
-    public const string END_TURN_ANIM_NAME = "OnTurnEnd";
+    public const string ON_TURN_END = "OnTurnEnd";
 
     private Player[] _players;
     private int _currentTurn = 0;
@@ -36,7 +36,7 @@ public class TurnManager : Manager
         for (int i = 0; i < 2; i++)
         {
             _players[i] = new GameObject("Player " + (i + 1), typeof(Player)).GetComponent<Player>();
-            _players[i].Initialize(i, false);
+            _players[i].Initialize(i);
         }
         Reset();
     }
@@ -53,8 +53,7 @@ public class TurnManager : Manager
         _activePlayer++;
         if (_activePlayer == _players.Length) _activePlayer = 0;
         if (_firstPlayer == _activePlayer) _currentTurn = CurrentTurn + 1;
-        Messenger.Broadcast(END_TURN_ANIM_NAME,GetActivePlayer());
-        Debug.Log("Turn: " + CurrentTurn + ", Player " + (_activePlayer + 1));
+        Messenger.Broadcast(ON_TURN_END);
     }
 
     public Player GetActivePlayer()

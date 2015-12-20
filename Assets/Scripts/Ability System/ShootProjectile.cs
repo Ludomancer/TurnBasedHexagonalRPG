@@ -30,6 +30,8 @@ internal class ShootProjectile : MonoBehaviour, ICastable
         GameObject effect = PoolManager.instance.GetObjectForName(_projectilePrefab.name, false, startPos,
             Quaternion.identity, null);
 
+        effect.transform.LookAt(endPos);
+
         while (progress < 1)
         {
             effect.transform.position = Vector3.Lerp(startPos, endPos, progress);

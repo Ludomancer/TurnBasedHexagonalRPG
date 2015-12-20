@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.Events;
 
 public class Destructable : MonoBehaviour
 {
@@ -6,6 +8,9 @@ public class Destructable : MonoBehaviour
 
     public const string ON_HEALTH_CHANGED = "OnHealthChanged";
     protected int _healthLeft;
+
+    [SerializeField]
+    protected UnityEvent _onNeedRemoval;
 
     [SerializeField]
     protected int _maxHealth;
@@ -26,11 +31,13 @@ public class Destructable : MonoBehaviour
         get { return _healthLeft; }
         set
         {
-            if (value > MaxHealth) value = MaxHealth;
+            value = Mathf.Clamp(value, 0, MaxHealth);
             if (_healthLeft != value)
             {
-                Messenger.Broadcast(ON_HEALTH_CHANGED, this, value - _healthLeft);
+                int delta = value - _healthLeft;
                 _healthLeft = value;
+                Messenger.Broadcast(ON_HEALTH_CHANGED, this, delta);
+                if (_healthLeft == 0) _onNeedRemoval.Invoke();
             }
         }
     }

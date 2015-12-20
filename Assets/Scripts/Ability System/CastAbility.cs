@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof (Ability))]
+[RequireComponent(typeof(Ability))]
 internal abstract class CastAbility : MonoBehaviour
 {
     #region Fields
@@ -38,8 +38,10 @@ internal abstract class CastAbility : MonoBehaviour
 
     public virtual void Cast()
     {
-        if (!_isBusy && _ability.Target)
+        if (!_isBusy && _ability && _ability.Target)
         {
+            //Ability might not have Owner and if Mana cost is0, we can ignore it.
+            if (_ability.ManaCost > 0) _ability.Owner.ManaLeft -= _ability.ManaCost;
             StartCoroutine(CastRoutine());
         }
     }
@@ -48,7 +50,7 @@ internal abstract class CastAbility : MonoBehaviour
     {
         _isBusy = true;
         //Use interfaces instead of send message for type safety.
-        Component[] castables = GetComponents(typeof (ICastable));
+        Component[] castables = GetComponents(typeof(ICastable));
         for (int i = 0; i < castables.Length; i++)
         {
             ((ICastable)castables[i]).Cast();

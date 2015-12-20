@@ -42,7 +42,7 @@ internal class ApplyDamage : MonoBehaviour, IAppliable
         else
         {
             if (_ignoreArmor) target.HealthLeft -= _damageAmount;
-            else target.HealthLeft -= Mathf.Max(1, target.Armor - _damageAmount);
+            else target.HealthLeft -= Mathf.Max(1, _damageAmount - target.Armor);
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof (CastAbility))]
+[RequireComponent(typeof(CastAbility))]
 public class Ability : MonoBehaviour
 {
     #region Fields
@@ -12,14 +12,21 @@ public class Ability : MonoBehaviour
     [SerializeField]
     private bool _canCastSurrounded;
 
+    [SerializeField]
+    private bool _disableAfterInit = true;
+
     private bool _isBusy;
+
     private bool _isInitialized;
+
+    [SerializeField]
+    private bool _isPassive = false;
 
     [SerializeField]
     private bool _isSubSkill;
 
     [SerializeField]
-    private int _mpCost;
+    private int _manaCost;
 
     [SerializeField]
     private HexUnit _owner;
@@ -45,7 +52,7 @@ public class Ability : MonoBehaviour
                 if (gameObject.activeInHierarchy)
                 {
                     //Use interfaces instead of send message for type safety.
-                    foreach (IOnTargetSelected onTargetSelected in GetComponents(typeof (IOnTargetSelected)))
+                    foreach (IOnTargetSelected onTargetSelected in GetComponents(typeof(IOnTargetSelected)))
                     {
                         onTargetSelected.OnTargetSelectionChanged(_target);
                     }
@@ -74,9 +81,9 @@ public class Ability : MonoBehaviour
         get { return _skillName; }
     }
 
-    public int MpCost
+    public int ManaCost
     {
-        get { return _mpCost; }
+        get { return _manaCost; }
     }
 
     public bool IsBusy
@@ -87,6 +94,11 @@ public class Ability : MonoBehaviour
     public bool IsSubSkill
     {
         get { return _isSubSkill; }
+    }
+
+    public bool IsPassive
+    {
+        get { return _isPassive; }
     }
 
     #endregion
@@ -106,7 +118,7 @@ public class Ability : MonoBehaviour
 
     protected virtual void Init()
     {
-        gameObject.SetActive(false);
+        if (_disableAfterInit) gameObject.SetActive(false);
         _isInitialized = true;
     }
 
@@ -114,7 +126,7 @@ public class Ability : MonoBehaviour
     {
         if (!_isSubSkill)
             Messenger.Broadcast(ON_CAST_COMPLETED, (Component)this, isSuccess);
-        DeactivatInternal();
+        if (!_isPassive) DeactivatInternal();
     }
 
     public void Activate()
@@ -152,6 +164,5 @@ public class Ability : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
-
     #endregion
 }

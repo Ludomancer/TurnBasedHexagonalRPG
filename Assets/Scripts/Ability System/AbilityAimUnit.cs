@@ -71,6 +71,7 @@ internal class AbilityAimUnit : AbilityAim
         if (targetHex.OccupyingObject)
         {
             HexUnit targetUnit = targetHex.OccupyingObject.GetComponent<HexUnit>();
+            if (targetUnit.IsDead) return false;
             if (_canTargetSelf && targetUnit == _ability.Owner) return true;
             if (targetUnit.OwnerId != _ability.Owner.OwnerId)
             {

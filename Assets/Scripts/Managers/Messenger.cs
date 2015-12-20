@@ -116,7 +116,6 @@ static internal class Messenger
         {
             eventTable.Add(eventType, null);
         }
-
         Delegate d = eventTable[eventType];
         if (d != null && d.GetType() != listenerBeingAdded.GetType())
         {

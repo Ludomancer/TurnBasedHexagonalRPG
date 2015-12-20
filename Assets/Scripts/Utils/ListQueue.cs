@@ -10,7 +10,7 @@ public class ListQueue<T> : List<T>
     public T Dequeue()
     {
         var t = base[0];
-        base.RemoveAt(0);
+        RemoveAt(0);
         return t;
     }
 

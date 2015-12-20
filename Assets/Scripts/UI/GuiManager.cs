@@ -102,7 +102,7 @@ public class GuiManager : Manager
             if (!_previousState.IsTransitioning)
             {
                 _isTransitioning = false;
-                _previousState.gameObject.SetActive(false);
+                PoolManager.instance.Recycle(_previousState.gameObject);
                 _currentState.gameObject.SetActive(true);
                 _currentState.BringPanel();
             }
@@ -132,5 +132,8 @@ public class GuiManager : Manager
         }
     }
 
-    void OnTransitionEnd(PanelBase panel) { TryToFinalizeTransition(); }
+    void OnTransitionEnd(PanelBase panel)
+    {
+        TryToFinalizeTransition();
+    }
 }

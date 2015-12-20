@@ -11,7 +11,12 @@ public class HexUnit : Destructable
 
     public const string ON_DODGED = "OnDodged";
     public const string ON_MOVE_COMPLETED = "OnMoveCompleted";
+    public const string ON_MANA_CHANGED = "OnManaChanged";
     private int _activeSkillIndex = -1;
+    private int _manaLeft;
+
+    [SerializeField]
+    private string _unitName;
 
     [SerializeField]
     private int _armor;
@@ -31,7 +36,7 @@ public class HexUnit : Destructable
     private float _movementSpeed;
 
     [SerializeField]
-    private int _mp;
+    private int _maxMana;
 
     [SerializeField]
     private int _ownerId;
@@ -107,9 +112,23 @@ public class HexUnit : Destructable
         get { return _skills; }
     }
 
-    public int Mp
+    public int MaxMana
     {
-        get { return _mp; }
+        get { return _maxMana; }
+    }
+
+    public int ManaLeft
+    {
+        get { return _manaLeft; }
+        set
+        {
+            value = Mathf.Clamp(value, 0, MaxMana);
+            if (_manaLeft != value)
+            {
+                _manaLeft = value;
+                Messenger.Broadcast(ON_MANA_CHANGED, this, value - _manaLeft);
+            }
+        }
     }
 
     #endregion
@@ -142,12 +161,32 @@ public class HexUnit : Destructable
         ToggleWeapons(false);
     }
 
-    public void ToggleWeapons(bool enabled)
+    public void ToggleWeapons(bool state)
     {
         if (_meleeAttack)
-            _meleeAttack.gameObject.SetActive(enabled);
+            _meleeAttack.gameObject.SetActive(state);
         if (_rangedAttack)
-            _rangedAttack.gameObject.SetActive(enabled);
+            _rangedAttack.gameObject.SetActive(state);
+    }
+
+    public void BeginTurn()
+    {
+        if (gameObject.activeInHierarchy)
+        {
+            for (int i = 0; i < _skills.Length; i++)
+            {
+                if (_skills[i].IsPassive)
+                {
+                    CastOnBeginTurn cobt = _skills[i].GetComponent<CastOnBeginTurn>();
+                    if (cobt)
+                    {
+                        _skills[i].Activate();
+                        _skills[i].Target = gameObject;
+                        cobt.Cast();
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -248,6 +287,33 @@ public class HexUnit : Destructable
         selfHexTile.OccupyingObject = null;
         _isBusy = false;
         Messenger.Broadcast(ON_MOVE_COMPLETED, (Component)this, true);
+    }
+
+    public override void Reset()
+    {
+        _healthLeft = MaxHealth;
+        _manaLeft = MaxMana;
+    }
+
+    public override int HealthLeft
+    {
+        get { return _healthLeft; }
+        set
+        {
+            value = Mathf.Clamp(value, 0, MaxHealth);
+            if (_healthLeft != value)
+            {
+                int delta = value - _healthLeft;
+                _healthLeft = value;
+                Messenger.Broadcast(ON_HEALTH_CHANGED, (Destructable)this, delta);
+                if (_healthLeft == 0) _onNeedRemoval.Invoke();
+            }
+        }
+    }
+
+    public string UnitName
+    {
+        get { return _unitName; }
     }
 
     #endregion
