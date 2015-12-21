@@ -1,9 +1,11 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 public static class ComponentExtensions
 {
+    #region Other Members
+
     /// <summary>
     /// Returns a string that has the name of every parent the object has seperated by "." starting from the top the current object until the topmost parent.
     /// </summary>
@@ -68,4 +70,6 @@ public static class ComponentExtensions
         }
         return tList.ToArray();
     }
+
+    #endregion
 }

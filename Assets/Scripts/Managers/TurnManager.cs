@@ -1,41 +1,43 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
 
+/// <summary>
+/// Hanldes turns of Players. Assumes 2 players.
+/// </summary>
 public class TurnManager : Manager
 {
-    #region Singleton
-
-    private static TurnManager _instance;
-
-    internal static TurnManager Instance
-    {
-        get
-        {
-            if (_instance != null) return _instance;
-
-            Assert.AreEqual(1, FindObjectsOfType<TurnManager>().Length);
-
-            _instance = FindObjectOfType<TurnManager>();
-            if (_instance != null) return _instance;
-
-            return _instance;
-        }
-    }
-    #endregion
+    #region Fields
 
     public const string ON_TURN_END = "OnTurnEnd";
-
-    private Player[] _players;
-    private int _currentTurn = 0;
     private int _activePlayer;
+    private int _currentTurn;
     private int _firstPlayer;
+    private Player[] _players;
+
+    #endregion
+
+    #region Properties
+
+    public int PlayerCount
+    {
+        get { return _players == null ? 0 : _players.Length; }
+    }
+
+    public int CurrentTurn
+    {
+        get { return _currentTurn; }
+    }
+
+    #endregion
+
+    #region Other Members
 
     public override void Init()
     {
         _players = new Player[2];
         for (int i = 0; i < 2; i++)
         {
-            _players[i] = new GameObject("Player " + (i + 1), typeof(Player)).GetComponent<Player>();
+            _players[i] = new GameObject("Player " + (i + 1), typeof (Player)).GetComponent<Player>();
             _players[i].Initialize(i);
         }
         Reset();
@@ -66,13 +68,26 @@ public class TurnManager : Manager
         return _players[i];
     }
 
-    public int PlayerCount
+    #endregion
+
+    #region Singleton
+
+    private static TurnManager _instance;
+
+    internal static TurnManager Instance
     {
-        get { return _players == null ? 0 : _players.Length; }
+        get
+        {
+            if (_instance != null) return _instance;
+
+            Assert.AreEqual(1, FindObjectsOfType<TurnManager>().Length);
+
+            _instance = FindObjectOfType<TurnManager>();
+            if (_instance != null) return _instance;
+
+            return _instance;
+        }
     }
 
-    public int CurrentTurn
-    {
-        get { return _currentTurn; }
-    }
+    #endregion
 }

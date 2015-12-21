@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
+/// <summary>
+/// Increases Mana of target.
+/// </summary>
+[RequireComponent(typeof (Ability))]
 internal class ApplyMana : MonoBehaviour, IAppliable
 {
     #region Fields

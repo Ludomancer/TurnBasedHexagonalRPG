@@ -6,7 +6,13 @@ namespace Assets
 {
     public class Cache<T> : IEnumerable<KeyValuePair<int, List<T>>>
     {
+        #region Fields
+
         private readonly Dictionary<int, List<T>> _cache = new Dictionary<int, List<T>>();
+
+        #endregion
+
+        #region Other Members
 
         /// <summary>
         /// Adds given item to given cache id.
@@ -18,7 +24,7 @@ namespace Assets
         {
             if (!_cache.ContainsKey(cacheId))
             {
-                _cache.Add(cacheId, new List<T>() { objectToCache });
+                _cache.Add(cacheId, new List<T> {objectToCache});
             }
             else
             {
@@ -54,7 +60,7 @@ namespace Assets
             foreach (KeyValuePair<int, List<T>> subCache in _cache)
             {
                 subCache.Value.Remove(objectToRemove);
-            }        
+            }
         }
 
         /// <summary>
@@ -115,6 +121,10 @@ namespace Assets
             _cache[cacheId].Clear();
         }
 
+        #endregion
+
+        #region IEnumerable<KeyValuePair<int,List<T>>> Members
+
         public IEnumerator<KeyValuePair<int, List<T>>> GetEnumerator()
         {
             return _cache.GetEnumerator();
@@ -124,5 +134,7 @@ namespace Assets
         {
             return GetEnumerator();
         }
+
+        #endregion
     }
 }

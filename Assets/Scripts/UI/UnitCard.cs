@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +15,8 @@ public class UnitCard : MonoBehaviour
     [SerializeField]
     private Color _allyColor;
 
+    private bool _canShowSkills;
+
     [SerializeField]
     private Color _enemyColor;
 
@@ -27,6 +28,8 @@ public class UnitCard : MonoBehaviour
 
     [SerializeField]
     private GameObject _skillPrefab;
+
+    private ToggleGroup _toggleGroup;
 
     [SerializeField]
     private Slider _unitHealthBar;
@@ -42,10 +45,6 @@ public class UnitCard : MonoBehaviour
 
     [SerializeField]
     private Text _unitNameText;
-
-    private bool _canShowSkills;
-
-    private ToggleGroup _toggleGroup;
 
     #endregion
 
@@ -95,7 +94,7 @@ public class UnitCard : MonoBehaviour
         if (unit.UniqueName != _lastLoadedUnitId)
         {
             TextAsset unitDataFile =
-                Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, unit.UniqueName), typeof(TextAsset)) as
+                Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, unit.UniqueName), typeof (TextAsset)) as
                     TextAsset;
             if (unitDataFile)
             {

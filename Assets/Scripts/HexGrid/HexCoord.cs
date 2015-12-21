@@ -1,6 +1,6 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Settworks.Hexagons
 {
@@ -15,28 +15,46 @@ namespace Settworks.Hexagons
     [Serializable]
     public struct HexCoord
     {
+        #region Fields
+
         public static readonly HexCoord INVALID = new HexCoord(int.MinValue, int.MinValue);
+        /*
+		 * Static Methods
+		 */
+
+        /// <summary>
+        /// HexCoord at (0,0)
+        /// </summary>
+        public static readonly HexCoord origin = default(HexCoord);
+
+        // The directions array. These are private to prevent overwriting elements.
+        private static readonly HexCoord[] neighbors =
+        {
+            new HexCoord(1, 0),
+            new HexCoord(0, 1),
+            new HexCoord(-1, 1),
+            new HexCoord(-1, 0),
+            new HexCoord(0, -1),
+            new HexCoord(1, -1)
+        };
+
+        private static readonly Vector2 Y_QR = new Vector2(-1 / 3f, 2 / 3f);
+
         /// <summary>
         /// Position on the q axis.
         /// </summary>
         [SerializeField]
         public int q;
+
         /// <summary>
         /// Position on the r axis.
         /// </summary>
         [SerializeField]
         public int r;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Settworks.Hexagons.HexCoord"/> struct.
-        /// </summary>
-        /// <param name="q">Position on the q axis.</param>
-        /// <param name="r">Position on the r axis.</param>
-        public HexCoord(int q, int r)
-        {
-            this.q = q;
-            this.r = r;
-        }
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Position on the cubic z axis.
@@ -60,6 +78,21 @@ namespace Settworks.Hexagons
         public int O
         {
             get { return q + (r >> 1); }
+        }
+
+        #endregion
+
+        #region Other Members
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Settworks.Hexagons.HexCoord"/> struct.
+        /// </summary>
+        /// <param name="q">Position on the q axis.</param>
+        /// <param name="r">Position on the r axis.</param>
+        public HexCoord(int q, int r)
+        {
+            this.q = q;
+            this.r = r;
         }
 
         /// <summary>
@@ -249,26 +282,29 @@ namespace Settworks.Hexagons
         public int PolarBoundingCornerIndex(bool CCW = false)
         {
             if (q == 0 && r == 0) return 0;
-            if (q > 0 && r >= 0) return CCW ?
-                (q > r) ? 1 : 2 :
-                (q < r) ? 5 : 4;
-            if (q <= 0 && r > 0) return (-q < r) ?
-                CCW ?
-                    (r > -2 * q) ? 2 : 3 :
-                    (r < -2 * q) ? 0 : 5 :
-                CCW ?
-                    (q > -2 * r) ? 3 : 4 :
-                    (q < -2 * r) ? 1 : 0;
-            if (q < 0) return CCW ?
-                (q < r) ? 4 : 5 :
-                (q > r) ? 2 : 1;
-            return (-r > q) ?
-                CCW ?
-                    (r < -2 * q) ? 5 : 0 :
-                    (r > -2 * q) ? 3 : 2 :
-                CCW ?
-                    (q < -2 * r) ? 0 : 1 :
-                    (q > -2 * r) ? 4 : 3;
+            if (q > 0 && r >= 0)
+                return CCW
+                    ? (q > r) ? 1 : 2
+                    : (q < r) ? 5 : 4;
+            if (q <= 0 && r > 0)
+                return (-q < r)
+                    ? CCW
+                        ? (r > -2 * q) ? 2 : 3
+                        : (r < -2 * q) ? 0 : 5
+                    : CCW
+                        ? (q > -2 * r) ? 3 : 4
+                        : (q < -2 * r) ? 1 : 0;
+            if (q < 0)
+                return CCW
+                    ? (q < r) ? 4 : 5
+                    : (q > r) ? 2 : 1;
+            return (-r > q)
+                ? CCW
+                    ? (r < -2 * q) ? 5 : 0
+                    : (r > -2 * q) ? 3 : 2
+                : CCW
+                    ? (q < -2 * r) ? 0 : 1
+                    : (q > -2 * r) ? 4 : 3;
         }
 
         /// <summary>
@@ -282,14 +318,14 @@ namespace Settworks.Hexagons
             if (q > 0 && r >= 0 || q == 0 && r == 0)
                 return (q > r) ? 0 : 1;
             if (q <= 0 && r > 0)
-                return (-q < r) ?
-                    (r > -2 * q) ? 2 : 3 :
-                    (q > -2 * r) ? 4 : 5;
+                return (-q < r)
+                    ? (r > -2 * q) ? 2 : 3
+                    : (q > -2 * r) ? 4 : 5;
             if (q < 0)
                 return (q < r) ? 6 : 7;
-            return (-r > q) ?
-                (r < -2 * q) ? 8 : 9 :
-                (q < -2 * r) ? 10 : 11;
+            return (-r > q)
+                ? (r < -2 * q) ? 8 : 9
+                : (q < -2 * r) ? 10 : 11;
         }
 
         /// <summary>
@@ -310,13 +346,14 @@ namespace Settworks.Hexagons
         {
             if (q == 0 && r == 0) return 0;
             if (q > 0 && r >= 0) return (q <= r) ? 1 : 0;
-            if (q <= 0 && r > 0) return (-q <= r) ?
-                (r <= -2 * q) ? 2 : 1 :
-                (q <= -2 * r) ? 3 : 2;
+            if (q <= 0 && r > 0)
+                return (-q <= r)
+                    ? (r <= -2 * q) ? 2 : 1
+                    : (q <= -2 * r) ? 3 : 2;
             if (q < 0) return (q >= r) ? 4 : 3;
-            return (-r > q) ?
-                (r >= -2 * q) ? 5 : 4 :
-                (q >= -2 * r) ? 0 : 5;
+            return (-r > q)
+                ? (r >= -2 * q) ? 5 : 4
+                : (q >= -2 * r) ? 0 : 5;
         }
 
         /// <summary>
@@ -365,6 +402,7 @@ namespace Settworks.Hexagons
             r = (int)(r * factor);
             return this;
         }
+
         /// <summary>
         /// Scale as a vector.
         /// </summary>
@@ -375,12 +413,15 @@ namespace Settworks.Hexagons
             r *= factor;
             return this;
         }
+
         /// <summary>
         /// Scale as a vector.
         /// </summary>
         /// <returns><see cref="UnityEngine.Vector2"/> representing the scaled vector.</returns>
         public Vector2 ScaleToVector(float factor)
-        { return new Vector2(q * factor, r * factor); }
+        {
+            return new Vector2(q * factor, r * factor);
+        }
 
         /// <summary>
         /// Determines whether this hex is within a specified rectangle.
@@ -390,9 +431,9 @@ namespace Settworks.Hexagons
         {
             if (r > cornerA.r && r > cornerB.r || r < cornerA.r && r < cornerB.r)
                 return false;
-            bool reverse = cornerA.O > cornerB.O;   // Travel right to left.
-            bool offset = cornerA.r % 2 != 0;   // Starts on an odd row, bump alternate rows left.
-            bool trim = Math.Abs(cornerA.r - cornerB.r) % 2 == 0;   // Even height, trim alternate rows.
+            bool reverse = cornerA.O > cornerB.O; // Travel right to left.
+            bool offset = cornerA.r % 2 != 0; // Starts on an odd row, bump alternate rows left.
+            bool trim = Math.Abs(cornerA.r - cornerB.r) % 2 == 0; // Even height, trim alternate rows.
             bool odd = (r - cornerA.r) % 2 != 0; // This is an alternate row.
             int width = Math.Abs(cornerA.O - cornerB.O);
             bool hasWidth = width != 0;
@@ -455,15 +496,6 @@ namespace Settworks.Hexagons
             return "(q:" + q + ", r:" + r + ")";
         }
 
-        /*
-		 * Static Methods
-		 */
-
-        /// <summary>
-        /// HexCoord at (0,0)
-        /// </summary>
-        public static readonly HexCoord origin = default(HexCoord);
-
         /// <summary>
         /// Distance between two hexes.
         /// </summary>
@@ -479,8 +511,7 @@ namespace Settworks.Hexagons
         {
             if (index < 0 ^ cycle < 0)
                 return (index % cycle + cycle) % cycle;
-            else
-                return index % cycle;
+            return index % cycle;
         }
 
         /// <summary>
@@ -499,7 +530,9 @@ namespace Settworks.Hexagons
         /// </remarks>
         /// <param name="index">Index of the desired neighbor vector. Cyclically constrained 0..5.</param>
         public static HexCoord NeighborVector(int index)
-        { return neighbors[NormalizeRotationIndex(index, 6)]; }
+        {
+            return neighbors[NormalizeRotationIndex(index, 6)];
+        }
 
         /// <summary>
         /// Enumerate the six neighbor vectors.
@@ -521,13 +554,17 @@ namespace Settworks.Hexagons
         /// Neighbor index of 0,0 through which a polar angle passes.
         /// </summary>
         public static int AngleToNeighborIndex(float angle)
-        { return Mathf.RoundToInt(angle / SEXTANT); }
+        {
+            return Mathf.RoundToInt(angle / SEXTANT);
+        }
 
         /// <summary>
         /// Polar angle for a neighbor of 0,0.
         /// </summary>
         public static float NeighborIndexToAngle(int index)
-        { return index * SEXTANT; }
+        {
+            return index * SEXTANT;
+        }
 
         /// <summary>
         /// Unity position vector from hex center to a corner.
@@ -555,7 +592,8 @@ namespace Settworks.Hexagons
                 foreach (Vector2 v in corners)
                     yield return v;
             }
-            else {
+            else
+            {
                 first = NormalizeRotationIndex(first, 6);
                 for (int i = first; i < 6; i++)
                     yield return corners[i];
@@ -568,32 +606,41 @@ namespace Settworks.Hexagons
         /// Corner of 0,0 closest to a polar angle.
         /// </summary>
         public static int AngleToCornerIndex(float angle)
-        { return Mathf.FloorToInt(angle / SEXTANT); }
+        {
+            return Mathf.FloorToInt(angle / SEXTANT);
+        }
 
         /// <summary>
         /// Polar angle for a corner of 0,0.
         /// </summary>
         public static float CornerIndexToAngle(int index)
-        { return (index + 0.5f) * SEXTANT; }
+        {
+            return (index + 0.5f) * SEXTANT;
+        }
 
         /// <summary>
         /// Half sextant of 0,0 through which a polar angle passes.
         /// </summary>
         public static int AngleToHalfSextant(float angle)
-        { return Mathf.RoundToInt(2 * angle / SEXTANT); }
+        {
+            return Mathf.RoundToInt(2 * angle / SEXTANT);
+        }
 
         /// <summary>
         /// Polar angle at which a half sextant begins.
         /// </summary>
         public static float HalfSextantToAngle(int index)
-        { return index * SEXTANT / 2; }
-
+        {
+            return index * SEXTANT / 2;
+        }
 
         /// <summary>
         /// <see cref="Settworks.Hexagons.HexCoord"/> containing a Unity position.
         /// </summary>
         public static HexCoord AtPosition(Vector2 position)
-        { return FromQRVector(VectorXYtoQR(position)); }
+        {
+            return FromQRVector(VectorXYtoQR(position));
+        }
 
         /// <summary>
         /// <see cref="Settworks.Hexagons.HexCoord"/> from hexagonal polar coordinates.
@@ -693,9 +740,10 @@ namespace Settworks.Hexagons
         {
             Vector2 min = new Vector2(Math.Min(cornerA.x, cornerB.x), Math.Min(cornerA.y, cornerB.y));
             Vector2 max = new Vector2(Math.Max(cornerA.x, cornerB.x), Math.Max(cornerA.y, cornerB.y));
-            HexCoord[] results = {
-                HexCoord.AtPosition(min),
-                HexCoord.AtPosition(max)
+            HexCoord[] results =
+            {
+                AtPosition(min),
+                AtPosition(max)
             };
             Vector2 pos = results[0].Position();
             if (pos.y - 0.5f >= min.y)
@@ -716,23 +764,43 @@ namespace Settworks.Hexagons
 
         // Cast to Vector2 in QR space. Explicit to avoid QR/XY mix-ups.
         public static explicit operator Vector2(HexCoord h)
-        { return new Vector2(h.q, h.r); }
+        {
+            return new Vector2(h.q, h.r);
+        }
+
         // +, -, ==, !=
         public static HexCoord operator +(HexCoord a, HexCoord b)
-        { return new HexCoord(a.q + b.q, a.r + b.r); }
+        {
+            return new HexCoord(a.q + b.q, a.r + b.r);
+        }
+
         public static HexCoord operator -(HexCoord a, HexCoord b)
-        { return new HexCoord(a.q - b.q, a.r - b.r); }
+        {
+            return new HexCoord(a.q - b.q, a.r - b.r);
+        }
+
         public static bool operator ==(HexCoord a, HexCoord b)
-        { return a.q == b.q && a.r == b.r; }
+        {
+            return a.q == b.q && a.r == b.r;
+        }
+
         public static bool operator !=(HexCoord a, HexCoord b)
-        { return a.q != b.q || a.r != b.r; }
+        {
+            return a.q != b.q || a.r != b.r;
+        }
+
         // Mandatory overrides: Equals(), GetHashCode()
         public override bool Equals(object o)
-        { return (o is HexCoord) && this == (HexCoord)o; }
+        {
+            return (o is HexCoord) && this == (HexCoord)o;
+        }
+
         public override int GetHashCode()
         {
-            return q & (int)0xFFFF | r << 16;
+            return q & 0xFFFF | r << 16;
         }
+
+        #endregion
 
         /*
 		 * Constants
@@ -748,18 +816,9 @@ namespace Settworks.Hexagons
         /// </summary>
         public static readonly float SQRT3 = Mathf.Sqrt(3);
 
-        // The directions array. These are private to prevent overwriting elements.
-        static readonly HexCoord[] neighbors = {
-            new HexCoord(1, 0),
-            new HexCoord(0, 1),
-            new HexCoord(-1, 1),
-            new HexCoord(-1, 0),
-            new HexCoord(0, -1),
-            new HexCoord(1, -1)
-        };
-
         // Corner locations in XY space. Private for same reason as neighbors.
-        static readonly Vector2[] corners = {
+        private static readonly Vector2[] corners =
+        {
             new Vector2(Mathf.Sin(SEXTANT), Mathf.Cos(SEXTANT)),
             new Vector2(0, 1),
             new Vector2(Mathf.Sin(-SEXTANT), Mathf.Cos(-SEXTANT)),
@@ -770,11 +829,8 @@ namespace Settworks.Hexagons
 
         // Vector transformations between QR and XY space.
         // Private to keep IntelliSense tidy. Safe to make public, but sensible uses are covered above.
-        static readonly Vector2 Q_XY = new Vector2(SQRT3, 0);
-        static readonly Vector2 R_XY = new Vector2(SQRT3 / 2, 1.5f);
-        static readonly Vector2 X_QR = new Vector2(SQRT3 / 3, 0);
-        static readonly Vector2 Y_QR = new Vector2(-1 / 3f, 2 / 3f);
-
+        private static readonly Vector2 Q_XY = new Vector2(SQRT3, 0);
+        private static readonly Vector2 R_XY = new Vector2(SQRT3 / 2, 1.5f);
+        private static readonly Vector2 X_QR = new Vector2(SQRT3 / 3, 0);
     }
 }
-

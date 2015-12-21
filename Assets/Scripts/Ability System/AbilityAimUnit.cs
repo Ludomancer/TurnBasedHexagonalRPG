@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Selects clicked unit as target.
+/// </summary>
 internal class AbilityAimUnit : AbilityAim
 {
     #region Fields

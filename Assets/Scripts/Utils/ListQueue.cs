@@ -2,9 +2,11 @@
 
 public class ListQueue<T> : List<T>
 {
-    public void Enqueue(T item)
+    #region Other Members
+
+    public T Peek()
     {
-        Add(item);
+        return base[0];
     }
 
     public T Dequeue()
@@ -14,8 +16,10 @@ public class ListQueue<T> : List<T>
         return t;
     }
 
-    public T Peek()
+    public void Enqueue(T item)
     {
-        return base[0];
+        Add(item);
     }
+
+    #endregion
 }

@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(CastAbility))]
+/// <summary>
+/// Basic class for all abilities. Does not do anything by itself.
+/// </summary>
+[RequireComponent(typeof (CastAbility))]
 public class Ability : MonoBehaviour
 {
     #region Fields
@@ -14,8 +17,6 @@ public class Ability : MonoBehaviour
 
     [SerializeField]
     private bool _disableAfterInit = true;
-
-    private bool _isBusy;
 
     private bool _isInitialized;
 
@@ -52,7 +53,7 @@ public class Ability : MonoBehaviour
                 if (gameObject.activeInHierarchy)
                 {
                     //Use interfaces instead of send message for type safety.
-                    foreach (IOnTargetSelected onTargetSelected in GetComponents(typeof(IOnTargetSelected)))
+                    foreach (IOnTargetSelected onTargetSelected in GetComponents(typeof (IOnTargetSelected)))
                     {
                         onTargetSelected.OnTargetSelectionChanged(_target);
                     }
@@ -164,5 +165,6 @@ public class Ability : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
     #endregion
 }

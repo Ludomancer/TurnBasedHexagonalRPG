@@ -2,13 +2,24 @@
 using System.Collections.Generic;
 using Settworks.Hexagons;
 
-class HexPathFinding : IShortestPath<HexCoord, HexCoord>
+internal class HexPathFinding : IShortestPath<HexCoord, HexCoord>
 {
+    #region Fields
+
     private readonly HexGrid _hexGrid;
+
+    #endregion
+
+    #region Other Members
+
     public HexPathFinding(HexGrid hexGrid)
     {
         _hexGrid = hexGrid;
     }
+
+    #endregion
+
+    #region IShortestPath<HexCoord,HexCoord> Members
 
     public float Heuristic(HexCoord fromLocation, HexCoord toLocation)
     {
@@ -53,4 +64,6 @@ class HexPathFinding : IShortestPath<HexCoord, HexCoord>
     {
         return HexCoord.INVALID;
     }
+
+    #endregion
 }

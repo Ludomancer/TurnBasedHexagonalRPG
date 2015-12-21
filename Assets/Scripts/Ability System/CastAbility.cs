@@ -2,7 +2,11 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Ability))]
+/// <summary>
+/// Base class for all cast classes.
+/// Casts and tracks status of castables.
+/// </summary>
+[RequireComponent(typeof (Ability))]
 internal abstract class CastAbility : MonoBehaviour
 {
     #region Fields
@@ -50,7 +54,7 @@ internal abstract class CastAbility : MonoBehaviour
     {
         _isBusy = true;
         //Use interfaces instead of send message for type safety.
-        Component[] castables = GetComponents(typeof(ICastable));
+        Component[] castables = GetComponents(typeof (ICastable));
         for (int i = 0; i < castables.Length; i++)
         {
             ((ICastable)castables[i]).Cast();

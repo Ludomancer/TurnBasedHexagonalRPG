@@ -1,26 +1,35 @@
 ﻿using System;
-using UnityEngine;
 using Settworks.Hexagons;
+using UnityEngine;
 using UnityEngine.EventSystems;
-
 
 public class HexTile : MonoBehaviour, IPointerClickHandler
 {
+    #region Fields
+
     public const string ON_HEX_CLICKED_EVENT_NAME = "OnHexClicked";
+    private HexCoord _hexCoord;
+
+    [SerializeField]
+    private State _highlightState;
 
     [SerializeField]
     private State _idleState;
-    [SerializeField]
-    private State _highlightState;
-    [SerializeField]
-    private State _notPassableState;
+
+    private bool _isPassable;
+
     [SerializeField]
     private int _movementCost;
 
-    private HexCoord _hexCoord;
-    private SpriteRenderer _spriteRenderer;
-    private bool _isPassable;
+    [SerializeField]
+    private State _notPassableState;
+
     private GameObject _occupyingObject;
+    private SpriteRenderer _spriteRenderer;
+
+    #endregion
+
+    #region Properties
 
     public HexCoord Coord
     {
@@ -57,6 +66,10 @@ public class HexTile : MonoBehaviour, IPointerClickHandler
         set { _occupyingObject = value; }
     }
 
+    #endregion
+
+    #region Other Members
+
     public void SetCoord(int q, int r, bool isPassable = true)
     {
         SetCoord(new HexCoord(q, r));
@@ -77,7 +90,6 @@ public class HexTile : MonoBehaviour, IPointerClickHandler
         SpriteRenderer.sprite = _highlightState.Sprite;
         SpriteRenderer.color = c;
     }
-
 
     public void HighlightTile()
     {
@@ -104,24 +116,33 @@ public class HexTile : MonoBehaviour, IPointerClickHandler
         else SetImpassable();
     }
 
+    #endregion
+
+    #region IPointerClickHandler Members
+
     public void OnPointerClick(PointerEventData eventData)
     {
         Messenger.Broadcast(ON_HEX_CLICKED_EVENT_NAME, this);
     }
 
+    #endregion
+
+    #region Nested type: State
+
     [Serializable]
     protected struct State
     {
-        [SerializeField]
-        Sprite _sprite;
-        [SerializeField]
-        Color _color;
+        #region Fields
 
-        public State(Sprite sprite, Color color)
-        {
-            _sprite = sprite;
-            _color = color;
-        }
+        [SerializeField]
+        private Color _color;
+
+        [SerializeField]
+        private Sprite _sprite;
+
+        #endregion
+
+        #region Properties
 
         public Sprite Sprite
         {
@@ -132,5 +153,19 @@ public class HexTile : MonoBehaviour, IPointerClickHandler
         {
             get { return _color; }
         }
+
+        #endregion
+
+        #region Other Members
+
+        public State(Sprite sprite, Color color)
+        {
+            _sprite = sprite;
+            _color = color;
+        }
+
+        #endregion
     }
+
+    #endregion
 }

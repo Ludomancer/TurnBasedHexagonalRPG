@@ -1,18 +1,24 @@
-﻿///This script has been taken from : http://wiki.unity3d.com/index.php?title=FramesPerSecond
-///Author: Dave Hampson 
+﻿//This script has been taken from : http://wiki.unity3d.com/index.php?title=FramesPerSecond
+//Author: Dave Hampson 
 
 using UnityEngine;
- 
+
 public class FPSDisplay : MonoBehaviour
 {
-	float deltaTime = 0.0f;
- 
-	void Update()
-	{
-		deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
-	}
+    #region Fields
 
-    void OnGUI()
+    private float deltaTime;
+
+    #endregion
+
+    #region Other Members
+
+    private void Update()
+    {
+        deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+    }
+
+    private void OnGUI()
     {
         int w = Screen.width, h = Screen.height;
 
@@ -27,4 +33,6 @@ public class FPSDisplay : MonoBehaviour
         string text = string.Format("{0:0.0} ms ({1:0.} fps)", msec, fps);
         GUI.Label(rect, text, style);
     }
+
+    #endregion
 }

@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 
-internal static class MeshExtensions {
-    
+internal static class MeshExtensions
+{
+    #region Other Members
+
     /// <summary>
     /// Sets the color value of the Mesh to given color value.
     /// </summary>
@@ -16,4 +18,6 @@ internal static class MeshExtensions {
         }
         mesh.colors = colors;
     }
+
+    #endregion
 }

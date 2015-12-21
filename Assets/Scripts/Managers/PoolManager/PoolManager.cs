@@ -6,52 +6,17 @@ using Random = UnityEngine.Random;
 
 public class PoolManager : Manager
 {
+    #region Fields
+
     public static PoolManager instance;
 
-    private int _currentOperations = 0;
-
     /// <summary>
-    /// Is Pool Manager available.
+    /// To prevent recreation of a new list everytime we search indexes.
     /// </summary>
-    public bool IsAvailable
-    {
-        get { return _currentOperations == 0; }
-    }
+    private List<int> _availableSearchResults;
 
-    /// <summary>
-    /// Total Buffer progress.
-    /// </summary>
-    [HideInInspector]
-    public int totalProgress = -1;
-    /// <summary>
-    /// Current Buffer progress.
-    /// </summary>
-    [HideInInspector]
-    public int currentProgress = -1;
-
-    /// <summary>
-    /// Array of Bufferable items.
-    /// </summary>
-    [Serializable]
-    public class Buffer
-    {
-        public GameObject prefab;
-        public int bufferAmount;
-        internal int currentBufferAmount = 0;
-        public int maximumBufferAmount;
-        public Stack<GameObject> pooledObjects = new Stack<GameObject>();
-    }
-
-
-    /// <summary>
-    /// The object prefabs which the pool can handle.
-    /// </summary>
-    public Buffer[] buffer;
-
-    /// <summary>
-    /// The pooled objects to be accessed by tags currently available.
-    /// </summary>
-    private Dictionary<string, List<int>> _objectIndexesByTag;
+    private int _currentOperations;
+    private bool _isPoolInitialized;
 
     /// <summary>
     /// To reduce heap allocations.
@@ -59,23 +24,35 @@ public class PoolManager : Manager
     private Dictionary<string, int> _objectIndexesByName;
 
     /// <summary>
+    /// The pooled objects to be accessed by tags currently available.
+    /// </summary>
+    private Dictionary<string, List<int>> _objectIndexesByTag;
+
+    /// <summary>
+    /// To prevent recreation of a new list everytime we search indexes.
+    /// </summary>
+    private List<int> _tagSearchResults;
+
+    /// <summary>
+    /// The object prefabs which the pool can handle.
+    /// </summary>
+    public Buffer[] buffer;
+
+    /// <summary>
+    /// The container object that we will keep unused pooled objects so we dont clog up the editor with objects.
+    /// </summary>
+    protected Transform containerObject;
+
+    /// <summary>
+    /// Current Buffer progress.
+    /// </summary>
+    [HideInInspector]
+    public int currentProgress = -1;
+
+    /// <summary>
     /// Its the default amount to buffer if object buffer has value -1.
     /// </summary>
     public int defaultBufferAmount = 3;
-
-    /// <summary>
-    /// Should we calculate the buffer loading percentage and report it.
-    /// </summary>
-    public bool reportPercentage = false;
-
-    /// <summary>
-    /// Should we index object by tags. Faster spawning and recycling but uses more memory. See Remark.
-    /// </summary>
-    /// <remarks>
-    /// Setting this option to false will seriously slows down any functionality about tags. 
-    /// Disable it only if you know what you are doing!
-    /// </remarks>
-    public bool indexObjectsByTag = false;
 
     /// <summary>
     /// Should we index object by tags. Faster spawning and recycling but uses more memory.
@@ -88,28 +65,51 @@ public class PoolManager : Manager
     public bool indexObjectsByName = false;
 
     /// <summary>
-    /// How often we should yield while buffering.
-    /// lessthen 0 for no yield.
+    /// Should we index object by tags. Faster spawning and recycling but uses more memory. See Remark.
     /// </summary>
-    public float yieldEveryNItemWhenBuffering = -1;
+    /// <remarks>
+    /// Setting this option to false will seriously slows down any functionality about tags. 
+    /// Disable it only if you know what you are doing!
+    /// </remarks>
+    public bool indexObjectsByTag = false;
 
     /// <summary>
-    /// The container object that we will keep unused pooled objects so we dont clog up the editor with objects.
+    /// Should we calculate the buffer loading percentage and report it.
     /// </summary>
-    protected Transform containerObject;
+    public bool reportPercentage = false;
+
     /// <summary>
     /// The container object that we will keep used pooled objects so we dont clog up the editor with objects.
     /// </summary>
     protected Transform spawnedFromPool;
 
     /// <summary>
-    /// To prevent recreation of a new list everytime we search indexes.
+    /// Total Buffer progress.
     /// </summary>
-    List<int> _tagSearchResults;
+    [HideInInspector]
+    public int totalProgress = -1;
+
     /// <summary>
-    /// To prevent recreation of a new list everytime we search indexes.
+    /// How often we should yield while buffering.
+    /// lessthen 0 for no yield.
     /// </summary>
-    List<int> _availableSearchResults;
+    public float yieldEveryNItemWhenBuffering = -1;
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Is Pool Manager available.
+    /// </summary>
+    public bool IsAvailable
+    {
+        get { return _currentOperations == 0; }
+    }
+
+    #endregion
+
+    #region Other Members
 
     /// <summary>
     /// Gets the total count of items to buffer.
@@ -124,9 +124,7 @@ public class PoolManager : Manager
         return totalBuffer;
     }
 
-    private bool _isPoolInitialized;
-
-    void Awake()
+    private void Awake()
     {
         PoolManager[] pms = FindObjectsOfType<PoolManager>();
         if (pms.Length == 0) Debug.Log("Cannot find 'PoolManager' object");
@@ -141,6 +139,7 @@ public class PoolManager : Manager
         if (indexObjectsByTag) _objectIndexesByTag = new Dictionary<string, List<int>>();
         if (indexObjectsByName) _objectIndexesByName = new Dictionary<string, int>(buffer.Length);
     }
+
     public override void Init()
     {
         useGUILayout = false;
@@ -230,7 +229,6 @@ public class PoolManager : Manager
             }
             if (buffer[i].pooledObjects.Count == 0)
             {
-
                 GameObject prefabCache = buffer[i].prefab;
 
                 int bufferAmount;
@@ -325,7 +323,9 @@ public class PoolManager : Manager
                     newObj.name = prefabCache.name;
                     Recycle(newObj);
                     if (reportPercentage) currentProgress++;
-                    if (yieldEveryNItemWhenBuffering > 0 && (currentProgress % yieldEveryNItemWhenBuffering == 0 || currentProgress == totalProgress)) yield return new WaitForEndOfFrame();
+                    if (yieldEveryNItemWhenBuffering > 0
+                        && (currentProgress % yieldEveryNItemWhenBuffering == 0 || currentProgress == totalProgress))
+                        yield return new WaitForEndOfFrame();
                 }
             }
         }
@@ -345,7 +345,6 @@ public class PoolManager : Manager
     {
         if (objectsToBeAdded != null && objectsToBeAdded.Length > 0)
         {
-
             List<Buffer> tempBuffer = new List<Buffer>(buffer.Length + objectsToBeAdded.Length);
             tempBuffer.AddRange(buffer);
             tempBuffer.AddRange(objectsToBeAdded);
@@ -479,13 +478,11 @@ public class PoolManager : Manager
         go.SetActive(true);
     }
 
-
     private void Disable(GameObject go)
     {
         go.SetActive(false);
         go.transform.SetParent(containerObject, false);
     }
-
 
     /// <summary>
     /// Finds and returns a GameObject from the pool by it's tag if available with the given parameters.
@@ -500,7 +497,6 @@ public class PoolManager : Manager
     {
         return GetObjectForTag(objectName, onlyPooled, Vector3.zero, Quaternion.identity, null);
     }
-
 
     /// <summary>
     /// Finds and returns a GameObject from the pool by it's tag if available with the given parameters.
@@ -520,7 +516,8 @@ public class PoolManager : Manager
     /// <param name='parent'>
     /// Parent to be set to the GameObject before returning.
     /// </param>
-    public GameObject GetObjectForTag(string objectTag, bool onlyPooled, Vector3 position, Quaternion angle, Transform parent)
+    public GameObject GetObjectForTag(string objectTag, bool onlyPooled, Vector3 position, Quaternion angle,
+        Transform parent)
     {
         Init();
         if (indexObjectsByTag)
@@ -576,7 +573,7 @@ public class PoolManager : Manager
             Enable(tempGameObject);
             return tempGameObject;
         }
-        else if (!onlyPooled && _tagSearchResults.Count > 0)
+        if (!onlyPooled && _tagSearchResults.Count > 0)
         {
             selectedItem = _tagSearchResults[Random.Range(0, _tagSearchResults.Count)];
             buffer[selectedItem].currentBufferAmount++;
@@ -633,7 +630,8 @@ public class PoolManager : Manager
     /// <param name='parent'>
     /// Parent to be set to the GameObject before returning.
     /// </param>
-    public GameObject GetObjectForName(string objectName, bool onlyPooled, Vector3 position, Quaternion angle, Transform parent)
+    public GameObject GetObjectForName(string objectName, bool onlyPooled, Vector3 position, Quaternion angle,
+        Transform parent)
     {
         Init();
         int index = -1;
@@ -672,7 +670,6 @@ public class PoolManager : Manager
 
         if (!onlyPooled && buffer[index].currentBufferAmount < buffer[index].maximumBufferAmount)
         {
-
             buffer[index].currentBufferAmount++;
             GameObject tempGameObject = Instantiate(buffer[index].prefab);
             Transform tempTransform = tempGameObject.transform;
@@ -692,7 +689,6 @@ public class PoolManager : Manager
         //If we have gotten here either there was no object of the specified type or non were left in the pool with onlyPooled set to true
         return null;
     }
-
 
     /// <summary>
     /// Returns true if any object is available with the given tag.
@@ -835,7 +831,6 @@ public class PoolManager : Manager
         _currentOperations--;
     }
 
-
     /// <summary>
     /// Truncates the excessive items from the Buffer item with the specified Buffer index.
     /// </summary>
@@ -868,4 +863,27 @@ public class PoolManager : Manager
         Resources.UnloadUnusedAssets();
         _currentOperations--;
     }
+
+    #endregion
+
+    #region Nested type: Buffer
+
+    /// <summary>
+    /// Array of Bufferable items.
+    /// </summary>
+    [Serializable]
+    public class Buffer
+    {
+        #region Fields
+
+        public int bufferAmount;
+        internal int currentBufferAmount;
+        public int maximumBufferAmount;
+        public Stack<GameObject> pooledObjects = new Stack<GameObject>();
+        public GameObject prefab;
+
+        #endregion
+    }
+
+    #endregion
 }

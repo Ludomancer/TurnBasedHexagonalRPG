@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Casts given sub ability to all units of target player. This won't cast by itself needs a CastAbility variant to be triggered.
+/// </summary>
 [RequireComponent(typeof (Ability))]
 internal class CastToAllUnits : MonoBehaviour, ICastable
 {

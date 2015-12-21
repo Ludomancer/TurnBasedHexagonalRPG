@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Text))]
+[RequireComponent(typeof (Text))]
 public class PopupText : MonoBehaviour
 {
+    #region Fields
+
     private Color _defaultColor;
+
+    #endregion
 
     #region Properties
 
@@ -53,33 +57,41 @@ public class PopupText : MonoBehaviour
 
     internal void Show(string text, float fadeOutDelay, float fadeOutDuration)
     {
-        Show(text, fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, _defaultColor, PopupAnimMode.Scale, false, false);
+        Show(text, fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, _defaultColor, PopupAnimMode.Scale, false,
+            false);
     }
 
     internal void Show(string text, float fadeOutDelay, float fadeOutDuration, Color popupColor)
     {
-        Show(text, fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, PopupAnimMode.Scale, false, false);
+        Show(text, fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, PopupAnimMode.Scale, false,
+            false);
     }
 
     internal void Show(int text, float fadeOutDelay, float fadeOutDuration)
     {
-        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, _defaultColor, PopupAnimMode.Scale, false, false);
+        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, _defaultColor,
+            PopupAnimMode.Scale, false, false);
     }
 
     internal void Show(int text, float fadeOutDelay, float fadeOutDuration, Color popupColor)
     {
-        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, PopupAnimMode.Scale, false, false);
+        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, PopupAnimMode.Scale,
+            false, false);
     }
 
-    internal void Show(int text, float fadeOutDelay, float fadeOutDuration, Color popupColor, PopupAnimMode animMode, bool resizeTextForBestFit)
+    internal void Show(int text, float fadeOutDelay, float fadeOutDuration, Color popupColor, PopupAnimMode animMode,
+        bool resizeTextForBestFit)
     {
-        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, animMode, resizeTextForBestFit, resizeTextForBestFit);
+        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, animMode,
+            resizeTextForBestFit, resizeTextForBestFit);
     }
 
-    internal void Show(int text, float fadeOutDelay, float fadeOutDuration, Color popupColor, PopupAnimMode animMode, bool resizeTextForBestFit,
+    internal void Show(int text, float fadeOutDelay, float fadeOutDuration, Color popupColor, PopupAnimMode animMode,
+        bool resizeTextForBestFit,
         bool forceSingleLine)
     {
-        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, animMode, resizeTextForBestFit, forceSingleLine);
+        Show(text.ToString(), fadeOutDelay, DEFAULT_FADE_IN_DURATION, fadeOutDuration, popupColor, animMode,
+            resizeTextForBestFit, forceSingleLine);
     }
 
     internal void Show(string text, float fadeOutDelay, float fadeOutDuration, Color popupColor, PopupAnimMode animMode)
@@ -132,12 +144,13 @@ public class PopupText : MonoBehaviour
 
     #region Methods
 
-    void Awake()
+    private void Awake()
     {
         _defaultColor = Text.color;
     }
 
-    internal void Show(string text, float fadeOutDelay, float fadeInDuration, float fadeOutDuration, Color popupColor, PopupAnimMode animMode, bool resizeTextForBestFit, bool forceSingleLine)
+    internal void Show(string text, float fadeOutDelay, float fadeInDuration, float fadeOutDuration, Color popupColor,
+        PopupAnimMode animMode, bool resizeTextForBestFit, bool forceSingleLine)
     {
         _isShown = false;
         _forceSingleLine = forceSingleLine;
@@ -177,7 +190,9 @@ public class PopupText : MonoBehaviour
         }
 
         //0.5 approx anim lenght
-        _hidePopupTime = _fadeOutDelay == NO_AUTO_FADE_OUT ? NO_AUTO_FADE_OUT : Time.realtimeSinceStartup + _fadeOutDelay;
+        _hidePopupTime = _fadeOutDelay == NO_AUTO_FADE_OUT
+            ? NO_AUTO_FADE_OUT
+            : Time.realtimeSinceStartup + _fadeOutDelay;
         _isShown = true;
     }
 

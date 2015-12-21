@@ -1,6 +1,9 @@
 using System;
-static class ArrayExtensions
+
+internal static class ArrayExtensions
 {
+    #region Other Members
+
     /// <summary>
     /// Shuffles given array.
     /// </summary>
@@ -18,4 +21,6 @@ static class ArrayExtensions
             array[k] = temp;
         }
     }
+
+    #endregion
 }

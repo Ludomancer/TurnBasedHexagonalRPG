@@ -13,10 +13,6 @@ public class HexUnit : Destructable
     public const string ON_MOVE_COMPLETED = "OnMoveCompleted";
     public const string ON_MANA_CHANGED = "OnManaChanged";
     private int _activeSkillIndex = -1;
-    private int _manaLeft;
-
-    [SerializeField]
-    private string _unitName;
 
     [SerializeField]
     private int _armor;
@@ -25,6 +21,10 @@ public class HexUnit : Destructable
     private float _dodgeChance;
 
     private bool _isBusy;
+    private int _manaLeft;
+
+    [SerializeField]
+    private int _maxMana;
 
     [SerializeField]
     private Ability _meleeAttack;
@@ -36,9 +36,6 @@ public class HexUnit : Destructable
     private float _movementSpeed;
 
     [SerializeField]
-    private int _maxMana;
-
-    [SerializeField]
     private int _ownerId;
 
     [SerializeField]
@@ -47,8 +44,18 @@ public class HexUnit : Destructable
     [SerializeField]
     private Ability[] _skills;
 
+    /// <summary>
+    /// Name that is used to fetch image from the json file.
+    /// Currently, the image is same but in a normal game the portrait image could/would be different, therefore functionality implemented.
+    /// </summary>
     [SerializeField]
     private string _uniqueName;
+
+    /// <summary>
+    /// Friendly name that is shown in UnitCard.
+    /// </summary>
+    [SerializeField]
+    private string _unitName;
 
     #endregion
 
@@ -131,6 +138,27 @@ public class HexUnit : Destructable
         }
     }
 
+    public override int HealthLeft
+    {
+        get { return _healthLeft; }
+        set
+        {
+            value = Mathf.Clamp(value, 0, MaxHealth);
+            if (_healthLeft != value)
+            {
+                int delta = value - _healthLeft;
+                _healthLeft = value;
+                Messenger.Broadcast(ON_HEALTH_CHANGED, (Destructable)this, delta);
+                if (_healthLeft == 0) _onNeedRemoval.Invoke();
+            }
+        }
+    }
+
+    public string UnitName
+    {
+        get { return _unitName; }
+    }
+
     #endregion
 
     #region Other Members
@@ -211,6 +239,10 @@ public class HexUnit : Destructable
         if (activeAbility) activeAbility.Deactivate();
     }
 
+    /// <summary>
+    /// Return active ability. RanggedAttack and MeleeAttack won't be returned.
+    /// </summary>
+    /// <returns></returns>
     public Ability ActiveSkill()
     {
         return Skills.Length == 0 || _activeSkillIndex == -1 ? null : Skills[_activeSkillIndex];
@@ -293,27 +325,6 @@ public class HexUnit : Destructable
     {
         _healthLeft = MaxHealth;
         _manaLeft = MaxMana;
-    }
-
-    public override int HealthLeft
-    {
-        get { return _healthLeft; }
-        set
-        {
-            value = Mathf.Clamp(value, 0, MaxHealth);
-            if (_healthLeft != value)
-            {
-                int delta = value - _healthLeft;
-                _healthLeft = value;
-                Messenger.Broadcast(ON_HEALTH_CHANGED, (Destructable)this, delta);
-                if (_healthLeft == 0) _onNeedRemoval.Invoke();
-            }
-        }
-    }
-
-    public string UnitName
-    {
-        get { return _unitName; }
     }
 
     #endregion

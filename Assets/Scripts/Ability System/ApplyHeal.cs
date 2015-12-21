@@ -1,6 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Heals target.
+/// </summary>
 [RequireComponent(typeof (Ability))]
 internal class ApplyHeal : MonoBehaviour, IAppliable
 {

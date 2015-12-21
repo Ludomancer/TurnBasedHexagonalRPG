@@ -4,16 +4,19 @@ using System.Linq;
 
 public static class EnumExtensions
 {
+    #region Other Members
+
     /// <summary>
     /// Checks wheter or not this enums is valid.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     private static void CheckEnumWithFlags<T>()
     {
-        if (!typeof(T).IsEnum)
-            throw new ArgumentException(string.Format("Type '{0}' is not an enum", typeof(T).FullName));
-        if (!Attribute.IsDefined(typeof(T), typeof(FlagsAttribute)))
-            throw new ArgumentException(string.Format("Type '{0}' doesn't have the 'Flags' attribute", typeof(T).FullName));
+        if (!typeof (T).IsEnum)
+            throw new ArgumentException(string.Format("Type '{0}' is not an enum", typeof (T).FullName));
+        if (!Attribute.IsDefined(typeof (T), typeof (FlagsAttribute)))
+            throw new ArgumentException(string.Format("Type '{0}' doesn't have the 'Flags' attribute",
+                typeof (T).FullName));
     }
 
     /// <summary>
@@ -40,7 +43,7 @@ public static class EnumExtensions
     public static IEnumerable<T> GetFlags<T>(this T value) where T : struct
     {
         CheckEnumWithFlags<T>();
-        foreach (T flag in Enum.GetValues(typeof(T)).Cast<T>())
+        foreach (T flag in Enum.GetValues(typeof (T)).Cast<T>())
         {
             if (value.HasFlag(flag))
                 yield return flag;
@@ -56,7 +59,7 @@ public static class EnumExtensions
     public static T[] GetFlagsAsArray<T>(this T value) where T : struct
     {
         CheckEnumWithFlags<T>();
-        return Enum.GetValues(typeof(T)).Cast<T>().Where(x => value.HasFlag(x)).ToArray();
+        return Enum.GetValues(typeof (T)).Cast<T>().Where(x => value.HasFlag(x)).ToArray();
     }
 
     /// <summary>
@@ -68,7 +71,7 @@ public static class EnumExtensions
     public static int GetNumberOfFlagsSet<T>(this T value) where T : struct
     {
         CheckEnumWithFlags<T>();
-        return Enum.GetValues(typeof(T)).Cast<T>().Count(x => value.HasFlag(x));
+        return Enum.GetValues(typeof (T)).Cast<T>().Count(x => value.HasFlag(x));
     }
 
     /// <summary>
@@ -92,7 +95,7 @@ public static class EnumExtensions
         {
             lValue &= (~lFlag);
         }
-        return (T)Enum.ToObject(typeof(T), lValue);
+        return (T)Enum.ToObject(typeof (T), lValue);
     }
 
     /// <summary>
@@ -135,7 +138,7 @@ public static class EnumExtensions
             long lFlag = Convert.ToInt64(flag);
             lValue |= lFlag;
         }
-        return (T)Enum.ToObject(typeof(T), lValue);
+        return (T)Enum.ToObject(typeof (T), lValue);
     }
 
     /// <summary>
@@ -148,7 +151,9 @@ public static class EnumExtensions
     {
         CheckEnumWithFlags<T>();
         Random random = new Random();
-        T[] flagValues = Enum.GetValues(typeof(T)).Cast<T>().Where(x => value.HasFlag(x)).ToArray();
+        T[] flagValues = Enum.GetValues(typeof (T)).Cast<T>().Where(x => value.HasFlag(x)).ToArray();
         return flagValues[random.Next(0, flagValues.Length)];
     }
+
+    #endregion
 }

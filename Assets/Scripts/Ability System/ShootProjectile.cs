@@ -2,6 +2,9 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Shoots and tracks a projectile and applies applliables to target in the end. 
+/// </summary>
 [RequireComponent(typeof (Ability))]
 internal class ShootProjectile : MonoBehaviour, ICastable
 {

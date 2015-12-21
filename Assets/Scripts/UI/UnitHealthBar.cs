@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-class UnitHealthBar : MonoBehaviour
+internal class UnitHealthBar : MonoBehaviour
 {
+    #region Fields
+
+    private RectTransform _rectTransform;
+
     [SerializeField]
     private Slider _slider;
 
-    private RectTransform _rectTransform;
+    #endregion
+
+    #region Properties
 
     public RectTransform GetRectTransform
     {
@@ -22,8 +24,14 @@ class UnitHealthBar : MonoBehaviour
         get { return _slider; }
     }
 
-    void Awake()
+    #endregion
+
+    #region Other Members
+
+    private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
     }
+
+    #endregion
 }

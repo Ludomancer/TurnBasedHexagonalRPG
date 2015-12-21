@@ -1,6 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Applies damage to target.
+/// </summary>
 [RequireComponent(typeof (Ability))]
 internal class ApplyDamage : MonoBehaviour, IAppliable
 {

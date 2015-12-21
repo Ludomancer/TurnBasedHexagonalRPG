@@ -1,14 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Simple replica of Net Generic Tuple class.
+/// </summary>
+/// <typeparam name="T1"></typeparam>
+/// <typeparam name="T2"></typeparam>
 [System.Serializable]
 public class Tuple<T1, T2>
 {
-    public readonly T1 first;
-    public readonly T2 second;
+    #region Fields
 
     private static readonly IEqualityComparer Item1Comparer = EqualityComparer<T1>.Default;
     private static readonly IEqualityComparer Item2Comparer = EqualityComparer<T2>.Default;
+    public readonly T1 first;
+    public readonly T2 second;
+
+    #endregion
+
+    #region Other Members
 
     public Tuple(T1 first, T2 second)
     {
@@ -55,4 +65,6 @@ public class Tuple<T1, T2>
     {
         return ReferenceEquals(obj, null);
     }
+
+    #endregion
 }

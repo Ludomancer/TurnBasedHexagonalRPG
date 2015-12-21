@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// Automatically selects Active player as target.
+/// </summary>
 internal class AbilityAimPlayer : AbilityAim
 {
     #region Other Members

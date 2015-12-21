@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 public class Destructable : MonoBehaviour
@@ -10,10 +9,10 @@ public class Destructable : MonoBehaviour
     protected int _healthLeft;
 
     [SerializeField]
-    protected UnityEvent _onNeedRemoval;
+    protected int _maxHealth;
 
     [SerializeField]
-    protected int _maxHealth;
+    protected UnityEvent _onNeedRemoval;
 
     protected Transform _transform;
 

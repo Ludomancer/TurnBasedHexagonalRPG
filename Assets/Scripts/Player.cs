@@ -4,9 +4,9 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     #region Fields
+
     public const string ON_UNIT_ADDED = "OnUnitAdded";
     public const string ON_UNIT_REMOVED = "OnUnitRemoved";
-
     private int _id = -1;
     private readonly ListQueue<HexUnit> _units = new ListQueue<HexUnit>();
 

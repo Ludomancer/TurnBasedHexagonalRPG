@@ -4,11 +4,17 @@ using UnityEngine.UI;
 
 public class GameOverPanel : PanelBase
 {
-    public string winString;
-    public string lostString;
+    #region Fields
+
     public string drawString;
+    public string lostString;
     public Text player1StatusText;
     public Text player2StatusText;
+    public string winString;
+
+    #endregion
+
+    #region Other Members
 
     public override void BringPanel()
     {
@@ -70,4 +76,6 @@ public class GameOverPanel : PanelBase
     {
         Application.Quit();
     }
+
+    #endregion
 }

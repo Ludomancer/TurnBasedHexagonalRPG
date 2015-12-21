@@ -1,10 +1,17 @@
 ﻿using UnityEngine;
 
-class AutoCastOnEnabled : CastAbility
+/// <summary>
+/// Automatically casts the abilit when the obbject is activated.
+/// </summary>
+internal class AutoCastOnEnabled : CastAbility
 {
-    void OnEnable()
+    #region Other Members
+
+    private void OnEnable()
     {
         Debug.Log("Cast");
         Cast();
     }
+
+    #endregion
 }

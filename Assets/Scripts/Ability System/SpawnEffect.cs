@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Spawns given gameObject.
+/// </summary>
 [RequireComponent(typeof (Ability))]
 internal class SpawnEffect : MonoBehaviour, IAppliable
 {

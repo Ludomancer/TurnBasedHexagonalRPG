@@ -1,18 +1,19 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections.Generic;
 
 public static class AudioSourceExtensions
 {
+    #region Other Members
+
     /// <summary>
     /// Converts samples to time depending on the frequency of the AudioSource.
     /// </summary>
     /// <param name="audioSource"></param>
     /// <param name="samples"></param>
     /// <returns></returns>
-    public static double ConvertSamplesToTime(this AudioSource audioSource,  int samples)
+    public static double ConvertSamplesToTime(this AudioSource audioSource, int samples)
     {
-        if(audioSource.clip == null) throw new Exception("Audio clip is null.");
+        if (audioSource.clip == null) throw new Exception("Audio clip is null.");
         return samples / (double)audioSource.clip.frequency;
     }
 
@@ -27,4 +28,6 @@ public static class AudioSourceExtensions
         if (audioSource.clip == null) throw new Exception("Audio clip is null.");
         return (int)(time * audioSource.clip.frequency);
     }
+
+    #endregion
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 internal class GameHud : PanelBase
 {
@@ -14,6 +14,7 @@ internal class GameHud : PanelBase
 
     [SerializeField]
     private GameObject _scorePopupPrefab;
+
     private Transform _transform;
 
     [SerializeField]
@@ -47,14 +48,14 @@ internal class GameHud : PanelBase
 
     private void OnUnitAdded(HexUnit newUnit)
     {
-        if (_healthBars.ContainsKey(newUnit.gameObject)) throw new Exception("Unit already added to HealthBar list. Possible double spawn?");
+        if (_healthBars.ContainsKey(newUnit.gameObject))
+            throw new Exception("Unit already added to HealthBar list. Possible double spawn?");
         GameObject healtBarGo = PoolManager.instance.GetObjectForName(_barPrefab.name, false);
         healtBarGo.transform.SetParent(_transform, false);
         UnitHealthBar unitHealth = healtBarGo.GetComponent<UnitHealthBar>();
         unitHealth.GetRectTransform.anchorMin = -Vector2.one;
         unitHealth.GetRectTransform.anchorMax = -Vector2.one;
         _healthBars.Add(newUnit.gameObject, unitHealth);
-
     }
 
     private void OnUnitRemoved(GameObject go)
@@ -64,13 +65,14 @@ internal class GameHud : PanelBase
         _healthBars.Remove(go);
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         foreach (KeyValuePair<GameObject, UnitHealthBar> unitHealth in _healthBars)
         {
             if (unitHealth.Key.activeSelf)
             {
-                Vector2 unitViewPoint = Camera.main.WorldToViewportPoint(_healthBarOffset + unitHealth.Key.transform.position);
+                Vector2 unitViewPoint =
+                    Camera.main.WorldToViewportPoint(_healthBarOffset + unitHealth.Key.transform.position);
                 unitHealth.Value.GetRectTransform.anchorMin = unitViewPoint;
                 unitHealth.Value.GetRectTransform.anchorMax = unitViewPoint;
             }
@@ -144,7 +146,8 @@ internal class GameHud : PanelBase
 
     public void ShowPopup(string text, Vector2 viewportPoint, Color c)
     {
-        GameObject popup = PoolManager.instance.GetObjectForName(_scorePopupPrefab.name, false, Vector3.zero, Quaternion.identity, null);
+        GameObject popup = PoolManager.instance.GetObjectForName(_scorePopupPrefab.name, false, Vector3.zero,
+            Quaternion.identity, null);
         if (popup)
         {
             popup.transform.SetParent(_transform, false);

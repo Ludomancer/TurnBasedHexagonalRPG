@@ -2,6 +2,8 @@
 
 public static class ValueExtensions
 {
+    #region Other Members
+
     /// <summary>
     /// Checks if the difference between two decimals are less tthan or equal to Epsilon.
     /// </summary>
@@ -80,7 +82,7 @@ public static class ValueExtensions
     /// <returns></returns>
     public static float FloorToMultiple(this float float1, float multiple)
     {
-       return Mathf.Floor((float1) / multiple) * multiple;
+        return Mathf.Floor((float1) / multiple) * multiple;
     }
 
     /// <summary>
@@ -115,4 +117,6 @@ public static class ValueExtensions
     {
         return (int)CeilToMultiple((float)int1, multiple);
     }
+
+    #endregion
 }

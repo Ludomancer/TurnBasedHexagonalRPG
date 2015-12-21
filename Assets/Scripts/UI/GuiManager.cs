@@ -4,35 +4,23 @@ using UnityEngine.Assertions;
 
 public class GuiManager : Manager
 {
-    #region Singleton
+    #region Fields
 
-    private static GuiManager _instance;
-
-    internal static GuiManager Instance
-    {
-        get
-        {
-            if (_instance != null) return _instance;
-
-            Assert.AreEqual(1, FindObjectsOfType<GuiManager>().Length);
-
-            _instance = FindObjectOfType<GuiManager>();
-            if (_instance != null) return _instance;
-
-            return _instance;
-        }
-    }
-    #endregion
-
-    [SerializeField]
-    private Transform _panelContainer;
+    private PanelBase _currentState;
 
     [SerializeField]
     private GameObject _defaultPanelPrefab;
 
-    PanelBase _currentState;
-    PanelBase _previousState;
-    bool _isTransitioning;
+    private bool _isTransitioning;
+
+    [SerializeField]
+    private Transform _panelContainer;
+
+    private PanelBase _previousState;
+
+    #endregion
+
+    #region Properties
 
     public PanelBase CurrentState
     {
@@ -64,6 +52,15 @@ public class GuiManager : Manager
         }
     }
 
+    public bool IsTransitioning
+    {
+        get { return _isTransitioning; }
+    }
+
+    #endregion
+
+    #region Other Members
+
     public PanelBase GetState(string key)
     {
         GameObject panel = PoolManager.instance.GetObjectForName(key, false);
@@ -85,12 +82,7 @@ public class GuiManager : Manager
         return null;
     }
 
-    public bool IsTransitioning
-    {
-        get { return _isTransitioning; }
-    }
-
-    void Start()
+    private void Start()
     {
         Init();
     }
@@ -124,7 +116,8 @@ public class GuiManager : Manager
             for (int i = 0; i < _panelContainer.childCount; i++)
             {
                 Transform tempTransform = _panelContainer.GetChild(i);
-                if (tempTransform != _currentState.transform && (_previousState == null || tempTransform != _previousState.transform))
+                if (tempTransform != _currentState.transform
+                    && (_previousState == null || tempTransform != _previousState.transform))
                 {
                     Destroy(tempTransform.gameObject);
                 }
@@ -132,8 +125,31 @@ public class GuiManager : Manager
         }
     }
 
-    void OnTransitionEnd(PanelBase panel)
+    private void OnTransitionEnd(PanelBase panel)
     {
         TryToFinalizeTransition();
     }
+
+    #endregion
+
+    #region Singleton
+
+    private static GuiManager _instance;
+
+    internal static GuiManager Instance
+    {
+        get
+        {
+            if (_instance != null) return _instance;
+
+            Assert.AreEqual(1, FindObjectsOfType<GuiManager>().Length);
+
+            _instance = FindObjectOfType<GuiManager>();
+            if (_instance != null) return _instance;
+
+            return _instance;
+        }
+    }
+
+    #endregion
 }

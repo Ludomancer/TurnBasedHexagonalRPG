@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Instantly applies all appliables.
+/// </summary>
 internal class InstantApply : MonoBehaviour, ICastable
 {
     #region ICastable Members

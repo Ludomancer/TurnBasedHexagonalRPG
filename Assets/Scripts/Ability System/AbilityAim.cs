@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base class for Target selectors of Abilit class.
+/// </summary>
 [RequireComponent(typeof (Ability))]
 internal abstract class AbilityAim : MonoBehaviour
 {

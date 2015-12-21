@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Casts the ability when clicked on screen.
+/// </summary>
 internal class ClickToCast : CastAbility
 {
     #region Other Members

@@ -1,7 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
-public class MainMenuPanel : PanelBase {
+public class MainMenuPanel : PanelBase
+{
+    #region Other Members
 
     public override void BringPanel()
     {
@@ -39,4 +41,6 @@ public class MainMenuPanel : PanelBase {
     {
         Application.Quit();
     }
+
+    #endregion
 }

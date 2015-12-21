@@ -1,7 +1,8 @@
-
 using UnityEngine;
- 
-public static class ColliderExtensions {
+
+public static class ColliderExtensions
+{
+    #region Other Members
 
     /// <summary>
     /// Is the collider bounds visible from given Camera.
@@ -27,4 +28,6 @@ public static class ColliderExtensions {
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
         return GeometryUtility.TestPlanesAABB(planes, _comfortZone);
     }
+
+    #endregion
 }

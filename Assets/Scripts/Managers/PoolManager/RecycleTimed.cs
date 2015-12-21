@@ -1,12 +1,18 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-class RecycleTimed : Recycle
+internal class RecycleTimed : Recycle
 {
-    public bool startOnEnable = false;
-    public float recycleDelay;
+    #region Fields
 
-    void OnEnable()
+    public float recycleDelay;
+    public bool startOnEnable = false;
+
+    #endregion
+
+    #region Other Members
+
+    private void OnEnable()
     {
         if (startOnEnable) RecycleObject();
     }
@@ -16,9 +22,11 @@ class RecycleTimed : Recycle
         StartCoroutine(RecycleRoutine());
     }
 
-    IEnumerator RecycleRoutine()
+    private IEnumerator RecycleRoutine()
     {
         yield return new WaitForSeconds(recycleDelay);
         RecycleInternal();
-    }  
+    }
+
+    #endregion
 }
