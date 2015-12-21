@@ -77,9 +77,9 @@ public class Player : MonoBehaviour
 
     public void RemoveAllUnits()
     {
-        for (int i = 0; i < _units.Count; i++)
+        while (_units.Count > 0)
         {
-            RemoveUnit(_units[i].gameObject);
+            RemoveUnit(_units[0].gameObject);
         }
     }
 
@@ -90,10 +90,9 @@ public class Player : MonoBehaviour
             HexUnit tempUnit = PeekUnit(u);
             if (!tempUnit || tempUnit.IsDead)
             {
-                //Player is out of units if unit is dead or not found and UnitCount is less than 2
+                //Player is out of units, if unit is dead or not found and UnitCount is less than 2
                 if (UnitCount < 2)
                 {
-                    //Check if other player has any units left, it might be draw
                     return false;
                 }
             }

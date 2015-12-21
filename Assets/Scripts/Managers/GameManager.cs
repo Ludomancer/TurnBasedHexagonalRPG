@@ -258,8 +258,18 @@ public class GameManager : Manager
 
     private int LoadArmyData()
     {
+#if UNITY_EDITOR
+        for (int j = 0; j < TurnManager.Instance.PlayerCount; j++)
+        {
+            if (TurnManager.Instance.GetPlayer(j).UnitCount > 0)
+            {
+                Debug.LogError("Player " + j + " has " + TurnManager.Instance.GetPlayer(j).UnitCount
+                    + " units at the start of the game!");
+            }
+        }
+#endif
         TextAsset unitDataFile =
-            Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, "Army"), typeof (TextAsset)) as TextAsset;
+            Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, "Army"), typeof(TextAsset)) as TextAsset;
         if (unitDataFile)
         {
             Dictionary<string, object> rawData = Json.Deserialize(unitDataFile.text) as Dictionary<string, object>;
@@ -322,7 +332,7 @@ public class GameManager : Manager
             if (_hexGrid.HeightInHexes - _maxSpawnDistance > targetHex.Coord.r) return;
         }
 
-        if (targetHex.IsPassable)
+        if (_selectedUnit && targetHex.IsPassable)
         {
             _selectedUnit.transform.position = targetHex.transform.position;
             targetHex.OccupyingObject = _selectedUnit.gameObject;
@@ -530,6 +540,7 @@ public class GameManager : Manager
         else
         {
             ResetActiveHexes();
+            bool hasValidMoves = false;
 
             //Mark movement range. Allows occupied hex in the last node.
             foreach (
@@ -551,6 +562,7 @@ public class GameManager : Manager
                         Tuple<HexTile, HexTile> meleeAttackTuple = new Tuple<HexTile, HexTile>(neighborHexTile, hexTile);
                         if (!_cachedMoveActions.Contains(meleeAttackTuple)) _cachedMoveActions.Add(meleeAttackTuple);
                         hexTile.HighlightTile(Color.red);
+                        hasValidMoves = true;
                     }
                 }
                 else
@@ -561,6 +573,7 @@ public class GameManager : Manager
                     {
                         _hexTileCache.Add(CACHE_MOVES, hexTile);
                         hexTile.HighlightTile();
+                        hasValidMoves = true;
                     }
                     else
                     {
@@ -574,37 +587,47 @@ public class GameManager : Manager
             if (_selectedUnit == _activeUnit)
             {
                 //Show active skilll.
-                HighlightAndCache(_activeUnit.ActiveSkill(), Color.cyan, CACHE_DIRECT_ACTION);
+                if (HighlightAndCache(_activeUnit.ActiveSkill(), Color.cyan, CACHE_DIRECT_ACTION)) hasValidMoves = true;
                 //Show melee attack.
-                HighlightAndCache(_activeUnit.MeleeAttack, Color.red, CACHE_DIRECT_ATTACK);
+                if (HighlightAndCache(_activeUnit.MeleeAttack, Color.red, CACHE_DIRECT_ATTACK)) hasValidMoves = true;
                 //Show ranged attack.
-                HighlightAndCache(_activeUnit.RangedAttack, Color.red, CACHE_DIRECT_ATTACK);
+                if (HighlightAndCache(_activeUnit.RangedAttack, Color.red, CACHE_DIRECT_ATTACK)) hasValidMoves = true;
             }
 
-            //Always highlight Active Unit.
-            if (!_hexTileCache.Contains(CACHE_DIRECT_ATTACK, _selectedHex))
+            if (hasValidMoves)
             {
-                if (!_hexTileCache.Contains(CACHE_OTHER, _selectedHex))
-                    _hexTileCache.Add(CACHE_OTHER, _selectedHex);
-                _selectedHex.HighlightTile(Color.white);
+                //Always highlight Active Unit.
+                if (!_hexTileCache.Contains(CACHE_DIRECT_ATTACK, _selectedHex))
+                {
+                    if (!_hexTileCache.Contains(CACHE_OTHER, _selectedHex))
+                        _hexTileCache.Add(CACHE_OTHER, _selectedHex);
+                    _selectedHex.HighlightTile(Color.white);
+                }
+            }
+            else
+            {
+                OnActionCompletedCallback(this, true);
             }
         }
     }
 
-    private void HighlightAndCache(Ability ability, Color c, int cacheId)
+    private bool HighlightAndCache(Ability ability, Color c, int cacheId)
     {
-        if (!ability) return;
+        if (!ability) return false;
         AbilityAim aim = ability.GetComponent<AbilityAim>();
         List<HexTile> availableHexTiles = aim.GetAvailableHexes(_hexGrid);
-        if (availableHexTiles == null) return;
+        if (availableHexTiles == null) return false;
+        bool hasValidHexes = false;
         foreach (HexTile availableHex in availableHexTiles)
         {
             if (!_hexTileCache.Contains(cacheId, availableHex))
             {
                 _hexTileCache.Add(cacheId, availableHex);
                 availableHex.HighlightTile(c);
+                hasValidHexes = true;
             }
         }
+        return hasValidHexes;
     }
 
     private void ResetActiveHexes()

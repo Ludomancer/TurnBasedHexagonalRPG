@@ -165,8 +165,7 @@ public class HexGrid : MonoBehaviour
     /// <summary>
     /// Return lenght of given column. Equal to HeightInHexes
     /// </summary>
-    /// <param name="r"></param>
-    public int GetColumnLenght(int r, int q)
+    public int GetColumnLenght()
     {
         return _heightInHexes;
     }
@@ -284,13 +283,12 @@ public class HexGrid : MonoBehaviour
             {
                 //Early exit if already checked this node
                 if (visited.Contains(neighbor)) continue;
-                //Make sure we are achecing inside the board.
+                //Make sure we are checking inside the board.
                 if (!IsCordinateValid(neighbor)) continue;
                 HexTile neighborTile = GetHexTile(neighbor);
                 //Make sure it is passable. Allow occupied hexes if they are the last node.
                 if (neighborTile.IsPassable
-                    || (allowOccupiedAsLast && neighborTile.IsOccupied
-                        && range - currentCost == GetHexTile(neighbor).MovementCost))
+                    || (allowOccupiedAsLast && neighborTile.IsOccupied && range - currentCost == GetHexTile(neighbor).MovementCost))
                 {
                     //Only increasenextElementsToDepthIncrease if element is added to the queue.
                     nextElementsToDepthIncrease++;
@@ -328,12 +326,13 @@ public class HexGrid : MonoBehaviour
     /// <returns>Enumarates and returns found HexTiles.</returns>
     public IEnumerable<HexTile> HexesInRange(HexCoord centerHex, int minRange, int maxRange)
     {
-        for (int r = centerHex.r - maxRange; r <= centerHex.r + maxRange; r++)
+        for (int r = Mathf.Max(centerHex.r - maxRange, 0); r <= Mathf.Min(centerHex.r + maxRange, _hexGrid.Length - 1); r++)
         {
-            for (int q = centerHex.q - maxRange; q <= centerHex.q + maxRange; q++)
+            int calculatedQ = (centerHex.q + r / 2);
+            for (int q = Mathf.Max(calculatedQ - maxRange, 0); q <= Mathf.Min(calculatedQ + maxRange, _hexGrid[r].Length - 1); q++)
             {
-                if (!IsCordinateValid(q, r)) continue;
-                HexTile tempHex = GetHexTile(q, r);
+                //if (!IsCordinateValid(q, r)) continue;
+                HexTile tempHex = GetHexTileDirect(q, r);
                 if (centerHex != tempHex.Coord)
                 {
                     float distance = Mathf.Abs(HexCoord.Distance(centerHex, tempHex.Coord));

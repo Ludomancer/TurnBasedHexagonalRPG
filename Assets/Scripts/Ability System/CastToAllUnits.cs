@@ -48,7 +48,7 @@ internal class CastToAllUnits : MonoBehaviour, ICastable
             newAbility.Target = target.PeekUnit(i).gameObject;
         }
 
-        //Wait for all casts to be complted.
+        //Wait for all casts to be completed.
         while (castables.Any(castable => (castable as ICastable).IsBusy()))
         {
             yield return null;
