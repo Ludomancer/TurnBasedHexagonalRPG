@@ -16,6 +16,10 @@
 *.userprefs 
 *.suo
 *.log
+*.pdf
+*.docx
+[Aa]sets/[Uu]nityVs
+*.dll
 
 # Big Files
 *.exe
@@ -24,6 +28,7 @@
 *.pdb
 *.apk
 *.dex
+*.jar
 
 # Audio Files
 #*.ogg

@@ -269,7 +269,7 @@ public class GameManager : Manager
         }
 #endif
         TextAsset unitDataFile =
-            Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, "Army"), typeof (TextAsset)) as TextAsset;
+            Resources.Load(PathExtensions.CombineForward(CommonPaths.UNIT_DATA_DIR, "Army"), typeof (TextAsset)) as TextAsset;
         if (unitDataFile)
         {
             Dictionary<string, object> rawData = Json.Deserialize(unitDataFile.text) as Dictionary<string, object>;
@@ -606,7 +606,7 @@ public class GameManager : Manager
             }
             else
             {
-                OnActionCompletedCallback(this, true);
+                if (_selectedUnit == _activeUnit) OnActionCompletedCallback(this, true);
             }
         }
     }

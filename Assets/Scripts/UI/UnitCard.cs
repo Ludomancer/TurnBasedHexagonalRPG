@@ -94,7 +94,7 @@ public class UnitCard : MonoBehaviour
         if (unit.UniqueName != _lastLoadedUnitId)
         {
             TextAsset unitDataFile =
-                Resources.Load(Path.Combine(CommonPaths.UNIT_DATA_DIR, unit.UniqueName), typeof (TextAsset)) as
+                Resources.Load(PathExtensions.CombineForward(CommonPaths.UNIT_DATA_DIR, unit.UniqueName), typeof (TextAsset)) as
                     TextAsset;
             if (unitDataFile)
             {
@@ -105,7 +105,7 @@ public class UnitCard : MonoBehaviour
                     {
                         string portraitKey = rawData[UNITY_PORTRAIT_KEY] as string;
                         _unitImage.sprite = !string.IsNullOrEmpty(portraitKey)
-                            ? Resources.Load<Sprite>(Path.Combine(CommonPaths.TEXTURES, portraitKey))
+                            ? Resources.Load<Sprite>(PathExtensions.CombineForward(CommonPaths.TEXTURES, portraitKey))
                             : null;
                     }
                     _lastLoadedUnitId = unit.UniqueName;
