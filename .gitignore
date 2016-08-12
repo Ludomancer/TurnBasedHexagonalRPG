@@ -9,6 +9,7 @@
 [Oo]bj/
 [Bb]uilds/
 [Bb]uild/
+Assets/UnityVS/
 *.csproj
 *.pidb
 *.unityproj
@@ -18,7 +19,6 @@
 *.log
 *.pdf
 *.docx
-[Aa]sets/[Uu]nityVs
 *.dll
 
 # Big Files
